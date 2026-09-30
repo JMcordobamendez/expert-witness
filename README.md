@@ -90,9 +90,10 @@ who raised or rejected it. There are no "do you approve my synthesis" rounds.
 
 Each run is three full subagent reviews (one of them on Opus) plus the
 session's own verification. In the eval suite below a with-plugin run cost
-about four to five times as much as the session reviewing alone (mean $0.87
-against $0.18 per run). Use it
-where a wrong verdict costs more than the review.
+about five times as much as the session reviewing alone (mean $0.93 per run
+that used the skill, against $0.18). When you invoke it by hand, use it where
+a wrong verdict costs more than the review; the three automatic moments run
+it regardless of cost.
 
 ## Why Fable is on a technical panel
 
@@ -122,7 +123,7 @@ Opus, same prompt, same tools), three runs per arm:
 | `clean-control` | a correct `clamp` with tests; measures invented findings |
 | `witness-contract` | the witness agent alone: report shape, the boundary bug, flagging the requester's opinion, no edits |
 
-Results of the final run (2026-09-30, orchestrator on Opus, no shell anywhere; mean score over 3 runs per arm):
+Results (2026-09-30, orchestrator on Opus, no shell anywhere; mean score over 3 runs per arm):
 
 | Case | With plugin | Without | Delta | With-plugin runs passed |
 |---|---|---|---|---|
@@ -133,13 +134,31 @@ Results of the final run (2026-09-30, orchestrator on Opus, no shell anywhere; m
 | plan-contradiction | 1.000 | 0.750 | +0.250 | 3 of 3 |
 | witness-contract | 1.000 | 0.125 | +0.875 | 3 of 3 |
 
-Without the plugin the session usually finds the planted defect too; what it
-loses is mostly the report (no named reviewers, no confirmed / rejected
-split), and in some runs it misses the bug (code-offbyone), invents a blocker
-(clean-control) or passes its own theory to the reviewer (failure-startup).
-The two with-plugin failures: in document-report the skill did not fire in
-one run (the prompt only says "critique it in detail"), and in clean-control
-the judge failed a report whose findings were all marked minor.
+How to read it:
+
+- document-report comes from a rerun after a fix to the skill's run-directory
+  rule (commit `7c7f2b5`). In the full-suite run (commit `1ad1025`) it scored
+  0.000: every write of the run directory went outside the working directory,
+  was refused, and the skill stopped without reviewing. The other five cases
+  were measured at `1ad1025`, before that fix and before the final review
+  round below, which changed the skill's wording but was not re-measured.
+- Only graders that apply to both arms count in the score. The with-only
+  indicators (three witnesses dispatched, Fable used, no source pasted into
+  the brief, facts in the brief) do not; they passed in every run where the
+  skill fired. So a with-plugin run where the skill did not fire can still
+  score 0.83 (document-report, run 3).
+- witness-contract tests the witness agent itself. Without the plugin the
+  agent does not exist, so its +0.875 is not a like-for-like comparison.
+- Without the plugin the session usually finds the planted defect too; what it
+  loses is mostly the report (no named reviewers, no confirmed / rejected
+  split). In some runs the judge also rejects its framing (in code-offbyone it
+  offered two fixes instead of calling the `<` the bug; in clean-control it
+  listed NaN as should-fix), and in one failure-startup run it passed its own
+  theory ("file permissions/umask") to the reviewer.
+- The two with-plugin failures: in document-report the skill did not fire in
+  one run (the prompt only says "critique it in detail"); in clean-control the
+  judge failed a report whose confirmed findings were all minor, and that
+  report also did not use the template's section names.
 
 Details, traces and every grader change with its evidence are in
 [`docs/results.md`](docs/results.md); the no-plugin baseline is described in
@@ -150,9 +169,16 @@ Details, traces and every grader change with its evidence are in
 - **The evals ran without a shell.** Nobody in any eval run, orchestrator or
   witness, had Bash: no `git`, no running tests, no reproducing a failure.
   Every review in the numbers above was done by reading files, and the
-  snapshots were file lists or `snapshot unavailable: no shell`. With a shell
+  snapshots were a file listing plus line counts. With a shell
   the skill takes real `git status` / hash snapshots and witnesses can run
   things; that path has not been measured.
+- **Paths no eval exercises:** retrying a failed witness, missing witnesses
+  and the insufficient mark, disputes, launching unasked, an after snapshot
+  that catches a change, reports in a language other than English, and a
+  witness writing (rather than editing) inside the reviewed repo. The spec's
+  "after snapshot shows no change" has no grader.
+- **The raw eval results are not in the repo** (`docs/.results*.json` are
+  ignored); `docs/results.md` quotes the numbers and traces they come from.
 - **The snapshot detects, it does not prevent.** Witnesses have the same tools
   as the session and are told to change nothing. That is an instruction, not
   a sandbox; the before/after snapshot is what catches a breach.

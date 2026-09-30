@@ -1,6 +1,6 @@
 # Brief
 
-Kind: <code | plan | document | failure>
+Kind: <code (diff, branch, module) | plan (spec, design, plan, task) | document (report, proposal, article, notes) | failure (won't start, failing test, wrong output)>
 
 ## Request (verbatim)
 > <the user's words, quoted exactly; never paraphrased>

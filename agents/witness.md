@@ -65,7 +65,8 @@ Then always:
     <each opinion you found and whether the evidence supports it, or "None.">
 
     ## Unintended consequences
-    <ripple effects on things outside the subject, or
+    <ripple effects of the subject, or of your proposed fixes, on things
+    outside it, or
     "None found — checked <what you checked>.">
 
     ## Could not check

@@ -1,6 +1,6 @@
 ---
 name: expert-witness
-description: Use when a spec, plan, design or document has just been written and is about to be acted on; when a failure has resisted two fix attempts; when a change is hard to undo or touches security; or when the user asks for an independent, blind or multi-model review, audit or critique of code, a plan, a document (a report, a proposal, a piece of writing) or a failure.
+description: Use when a spec, plan or design has just been written and is about to be acted on; when a failure has resisted two fix attempts; when a change is hard to undo or touches security; or when the user asks for an independent, blind or multi-model review, audit or critique of code, a plan, a document (a report, a proposal, a piece of writing) or a failure.
 ---
 
 # Expert witness
@@ -21,7 +21,8 @@ Only at these moments:
 
 Announce it in one line (what and why) and carry on without waiting. Do not
 re-run on the same subject unless something new has happened: new commits,
-new evidence, or the user disputes a verdict.
+new evidence, or the user disputes a verdict. The cost of a run is not a
+reason to skip it.
 
 ## Steps
 
@@ -29,15 +30,19 @@ new evidence, or the user disputes a verdict.
    else `mktemp -d`. Never inside the reviewed repo or next to the reviewed
    file. With no shell, writes are usually allowed only inside the working
    directory, so try `<working directory>/expert-witness-run-<n>/` first.
-   It is the right place when the subject sits in a subfolder (`./app`,
-   `./notes/proposal.md`); it is wrong only when the working directory is
-   itself the reviewed repo or directly holds the reviewed file. If a write
-   is refused, try another place outside the subject. Only when no place
-   accepts a write, say so and stop. Do not review it yourself instead.
+   It is the right place only when the working directory is not inside a
+   git repository (no `.git` in it or in any parent) and does not directly
+   hold the reviewed file. If a write is refused, try another place outside
+   the subject. Only when no place accepts a write, say so and stop. Do not
+   review it yourself instead.
 
 2. **Brief.** Copy `brief-template.md` to `<run>/brief.md` and fill every
    slot. The request is the user's own words, quoted exactly. Material is
-   pointers, never pasted content.
+   pointers, never pasted content. The kind is `code` (a diff, branch or
+   module), `plan` (a spec, design, plan or task), `document` (a report,
+   proposal, article or notes) or `failure` (something that will not start,
+   a failing test, wrong output). A `.docx` is first converted to text into
+   `<run>/`, never next to the original; point the brief at both.
 
    For a failure, "Observed facts" holds only things that were seen: the
    symptom, how to reproduce it, errors and logs verbatim, and each thing
@@ -47,7 +52,8 @@ new evidence, or the user disputes a verdict.
    states or implies a conclusion of yours (see the red flags at the end).
 
 3. **Before snapshot.** In a git repo: `git status --porcelain` and
-   `git rev-parse HEAD`. Otherwise: a hash of every file the brief points at.
+   `git rev-parse HEAD`. Otherwise: a hash of every file the brief points at;
+   for a live system, also its state (service status and the like).
    Save it as `<run>/before.txt`. With no shell, say so up front and do not
    dispatch helpers to run commands: the snapshot is a Glob of the whole
    reviewed tree (so new files show) plus the line count of each file the
@@ -65,7 +71,8 @@ new evidence, or the user disputes a verdict.
 6. **Collect.** Read each `witness-<model>.md`. A witness that failed, or
    whose report lacks the finding fields or the closing sections, is
    dispatched once more with the same prompt. If it fails again, it is
-   missing. With one witness left, the report is marked insufficient.
+   missing. With one witness left, the report is marked insufficient; with
+   none, stop and report that no witness answered.
 
 7. **Cluster.** Merge findings about the same location and problem. Record
    who raised each (S, O, F). Keep single-witness findings.
@@ -81,15 +88,16 @@ new evidence, or the user disputes a verdict.
    confirmed finding's severity; a witness's rating is an opinion. Critical
    or important only if it contradicts what the subject itself says or
    promises (its docstring, spec, tests, data or log) or the user's request,
-   or is a security or data-loss risk. A problem that needs an input or use
+   or is a security or data-loss risk, or would stop the subject serving its
+   purpose (a plan step that cannot work, information the reader needs to
+   decide). A problem that needs an input or use
    the subject never promises to handle is minor. When nothing confirmed is
    critical or important, the report says so on the line right under its
    header.
 
 9. **Report.** Fill `report-template.md` in the user's language and save it
    as `<run>/report.md`. Your final message is that filled template itself,
-   every section present (write "None" in an empty one), with the run path at
-   the end: which witnesses answered by name and model (S sonnet, O opus,
+   every section present (write "None" in an empty one): which witnesses answered by name and model (S sonnet, O opus,
    F fable), and for each finding its location, the quoted evidence and the
    proposed fix. A prose summary that points to the file is not the report.
 
