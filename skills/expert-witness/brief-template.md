@@ -20,4 +20,4 @@ Kind: <code | plan | document | failure>
 Nothing else goes here.>
 
 ## Your report
-Write it to: <run directory>/witness-<model>.md
+Write it to the path given in your dispatch prompt.

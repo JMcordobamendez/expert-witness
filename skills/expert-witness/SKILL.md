@@ -27,11 +27,12 @@ new evidence, or the user disputes a verdict.
 
 1. **Run directory.** Your scratchpad directory if the harness gives one,
    else `mktemp -d`. Never inside the reviewed repo or next to the reviewed
-   file. With no shell: a new directory in the parent of the directory that
-   holds the reviewed repo or file, inside the working directory, such as
-   `<parent>/expert-witness-run-<n>/`. If a write to the run directory is
-   refused, pick another place outside the reviewed subject; if none accepts
-   a write, say so and stop. Do not review it yourself instead.
+   file. With no shell: `./expert-witness-run-<n>/` directly in the working
+   directory, but only if the working directory is not itself the reviewed
+   repo and does not directly hold the reviewed file. Otherwise, or if a
+   write there is refused, pick another writable place outside the reviewed
+   subject; if none accepts a write, say so and stop. Do not review it
+   yourself instead.
 
 2. **Brief.** Copy `brief-template.md` to `<run>/brief.md` and fill every
    slot. The request is the user's own words, quoted exactly. Material is
@@ -41,15 +42,19 @@ new evidence, or the user disputes a verdict.
    symptom, how to reproduce it, errors and logs verbatim, and each thing
    tried with what happened. Your theories go nowhere in the brief.
 
+   Before dispatching, reread `brief.md` and delete every sentence that
+   states or implies a conclusion of yours (see the red flags at the end).
+
 3. **Before snapshot.** In a git repo: `git status --porcelain` and
    `git rev-parse HEAD`. Otherwise: a hash of every file the brief points at.
    Save it as `<run>/before.txt`. With no shell, say so up front and do not
-   dispatch helpers to run commands: the snapshot is the list of files the
-   brief points at with their sizes (Glob, Read), or the exact line
-   `snapshot unavailable: no shell`. The report then says the change check
-   was limited.
+   dispatch helpers to run commands: the snapshot is a Glob of the whole
+   reviewed tree (so new files show) plus the line count of each file the
+   brief points at (Read), or the exact line `snapshot unavailable: no
+   shell`. The report then says the change check was limited.
 
-4. **Dispatch.** In ONE message, three Agent calls:
+4. **Dispatch.** In ONE message, three Agent calls in the foreground (no
+   `run_in_background`), and wait for all three before step 5:
    `subagent_type: "expert-witness:witness"` with `model: "sonnet"`, then
    `"opus"`, then `"fable"`. Each prompt is exactly:
    `Your brief is <run>/brief.md. Write your report to <run>/witness-<model>.md.`
@@ -70,14 +75,15 @@ new evidence, or the user disputes a verdict.
    (say why). A finding does not become true because three witnesses said it,
    nor false because one did.
 
-   Confirmed means you can point at the line and it contradicts what the
-   subject itself says or promises (its docstring, spec, tests, data or log),
-   or it gives a wrong result for an input the subject says it accepts. A
-   problem that needs an input or use the subject never promises to handle
-   is minor at most, and without a promise to break it is "does not hold". You
-   set each confirmed finding's severity; a witness's rating is an opinion.
-   When nothing confirmed is critical or important, the report says so in its
-   first line.
+   Confirmed means the quote exists and the source shows what the finding
+   says. Does not hold means the source does not show it. You set each
+   confirmed finding's severity; a witness's rating is an opinion. Critical
+   or important only if it contradicts what the subject itself says or
+   promises (its docstring, spec, tests, data or log) or the user's request,
+   or is a security or data-loss risk. A problem that needs an input or use
+   the subject never promises to handle is minor. When nothing confirmed is
+   critical or important, the report says so on the line right under its
+   header.
 
 9. **Report.** Fill `report-template.md` in the user's language and save it
    as `<run>/report.md`. Your final message is that filled template itself,

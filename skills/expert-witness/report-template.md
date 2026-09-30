@@ -2,8 +2,11 @@
 
 Kind: <kind> · Witnesses: <S/O/F that answered> · Run: <run directory>
 
+<one line: nothing critical or important confirmed, or how many were>
+
 ## Changes made by witnesses
-<only if the after snapshot differs: what changed and where>
+<what changed and where if the after snapshot differs; say so if the
+snapshot was limited or unavailable; otherwise "None">
 
 ## Diagnosis
 <failure only: the confirmed cause, or the competing ones with their evidence>
