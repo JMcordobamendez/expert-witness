@@ -76,3 +76,26 @@ clean-control final full run: 1.0, 1.0, 0.75. The failing run's report is correc
 - Step 8: adds the "confirmed" definition and the severity rule (iteration 1).
 - Step 9: the final message is the filled template (iteration 1).
 - `.gitignore` gains `docs/.results.json` (R2); `docs/baseline.md` gains the R7 note.
+
+## Task 5 review (fresh reviewer, no session context)
+
+### Verdict on the two grader changes
+
+Partly a real bug, partly weaker. The old patterns matched legitimate content: the witnesses' `witness-*.md` Writes quote the source (the contract requires verbatim evidence) and the final `report.md` may say the refuted theory was refuted. Narrowing to the brief and the dispatch prompts was right: the spec checks "the theory is not in `brief.md`" and plan Review Focus 4 checks "the brief never pastes the source". But the narrowed patterns had two holes, tested with synthetic JSON-lines in Python `re` and Node `RegExp` (the grader engine):
+
+1. They required `"file_path"` to be the first key of the Write input, so a brief Write with `content` first, leaking the theory or the source, passed. The old pattern caught it.
+2. Neither the old nor the new pattern saw `Edit`. Filling the template without a shell is naturally a Write followed by Edits, so a theory added by Edit went unseen.
+
+Fix (commit after `14e8fcd`): the Write branch became `"name":\s*"(?:Write|Edit)",\s*"input":\s*\{(?=[^\n]*"file_path":\s*"[^"]*brief\.md")[^\n]*<word>`, which matches in any key order and covers Edit. Controls: Write of `brief.md` with `file_path` first, with `content` first, an Edit of `brief.md`, and an Agent prompt all match; a clean brief, `report.md` naming the word, and a witness report that cites `"/x/brief.md"` inside its text do not. The same shape was applied to `facts-in-brief` (positive grader), whose old pattern passed on `reinstall` anywhere in any Write, including a witness report. All three changes make the graders stricter, not softer. The earlier sentence "A leak into a brief or dispatch is still caught" (grader bug 2 above) overstated the old fix.
+
+Not changed: `theory-not-in-brief` still matches `umask` in any Bash input. Bash is never granted (R1), so this has no effect today; whoever grants Bash later should restrict that branch to commands that write `brief.md`.
+
+### Skill fixes from the review
+
+- Step 8: iteration 1 made "confirmed" mean "contradicts what the subject promises", which contradicts the spec (confirmed = the evidence checks out against the source) and would reject in-scope findings such as security, missing tests, plan gaps or a mismatch with the request. Now: confirmed means the source shows what the finding says; the subject's promises decide severity (critical or important only against a promise, the request, or a security or data-loss risk; an unpromised input is minor).
+- Step 2: the spec's "reread the brief and remove any sentence that states or implies a conclusion" is now an explicit step, not only the red-flag list.
+- Step 4: dispatch in the foreground and wait for all three (baseline run 3 of plan-contradiction ended its turn on a background dispatch).
+- Step 1: the no-shell run directory is `./expert-witness-run-<n>/` in the working directory, only when that directory is not the reviewed repo and does not directly hold the reviewed file. The iteration-2 wording ("the parent of the directory that holds the reviewed repo, inside the working directory") was self-contradictory for `./repo`.
+- Step 3: the no-shell snapshot is a Glob of the whole reviewed tree plus line counts (Glob and Read give no byte sizes, and a list of pointed-at files cannot show a file a witness creates).
+- `brief-template.md`: the report path is left to the dispatch prompt, so all three witnesses get the identical brief the spec requires.
+- `report-template.md`: a verdict line under the header (step 8 asked for it "in the first line", which is the header), and "Changes made by witnesses" says when the snapshot was limited.
