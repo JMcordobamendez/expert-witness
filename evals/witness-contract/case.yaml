@@ -1,0 +1,14 @@
+schema_version: "1.1"
+name: witness-contract
+description: The witness agent alone, given a brief and a report path, must produce a report in the strict contract shape
+tags: [witness]
+runs: 3
+context:
+  scaffold_script: scaffold.sh
+execution:
+  model: opus
+  max_turns: 80
+  timeout_seconds: 2400
+  allowed_tools: [Read, Glob, Grep, Write, Edit, Skill, Agent, TodoWrite]
+  prompt: |
+    Dispatch the expert-witness:witness agent once, with model sonnet, telling it: "Your brief is ./run/brief.md. Write your report to ./run/witness-sonnet.md." Then print ./run/witness-sonnet.md verbatim as your final message, with nothing added.
