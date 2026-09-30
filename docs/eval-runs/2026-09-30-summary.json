@@ -1,0 +1,466 @@
+{
+ "full-suite": {
+  "commit": "1ad1025",
+  "claudeVersion": "2.1.285",
+  "startedAt": "2026-09-30T13:10:53.944Z",
+  "durationSeconds": 659,
+  "costUsd": 15.0,
+  "aggregates": {
+   "casesTotal": 6,
+   "casesPassed": 4,
+   "overallScore": 0.7916666666666666,
+   "overallPassRate": 0.7777777777777777,
+   "meanDelta": 0.21805555555555553
+  },
+  "cases": {
+   "clean-control": {
+    "aggregates": {
+     "score": 0.75,
+     "passRate": 0.6666666666666666,
+     "scoreWithout": 0.5,
+     "passRateWithout": 0,
+     "delta": 0.25
+    },
+    "arms": {
+     "with": [
+      {
+       "score": 1,
+       "costUsd": 1.087,
+       "durationSeconds": 157,
+       "failed": []
+      },
+      {
+       "score": 0.25,
+       "costUsd": 1.129,
+       "durationSeconds": 163,
+       "failed": [
+        "no-invented"
+       ]
+      },
+      {
+       "score": 1,
+       "costUsd": 1.067,
+       "durationSeconds": 164,
+       "failed": []
+      }
+     ],
+     "without": [
+      {
+       "score": 0.75,
+       "costUsd": 0.209,
+       "durationSeconds": 45,
+       "failed": [
+        "report-shape"
+       ]
+      },
+      {
+       "score": 0,
+       "costUsd": 0.204,
+       "durationSeconds": 54,
+       "failed": [
+        "no-invented",
+        "report-shape"
+       ]
+      },
+      {
+       "score": 0.75,
+       "costUsd": 0.201,
+       "durationSeconds": 52,
+       "failed": [
+        "report-shape"
+       ]
+      }
+     ]
+    }
+   },
+   "code-offbyone": {
+    "aggregates": {
+     "score": 1,
+     "passRate": 1,
+     "scoreWithout": 0.5,
+     "passRateWithout": 0,
+     "delta": 0.5
+    },
+    "arms": {
+     "with": [
+      {
+       "score": 1,
+       "costUsd": 0.899,
+       "durationSeconds": 134,
+       "failed": []
+      },
+      {
+       "score": 1,
+       "costUsd": 0.825,
+       "durationSeconds": 120,
+       "failed": []
+      },
+      {
+       "score": 1,
+       "costUsd": 0.908,
+       "durationSeconds": 130,
+       "failed": []
+      }
+     ],
+     "without": [
+      {
+       "score": 0.75,
+       "costUsd": 0.197,
+       "durationSeconds": 55,
+       "failed": [
+        "report-shape"
+       ]
+      },
+      {
+       "score": 0,
+       "costUsd": 0.192,
+       "durationSeconds": 49,
+       "failed": [
+        "offbyone",
+        "report-shape"
+       ]
+      },
+      {
+       "score": 0.75,
+       "costUsd": 0.212,
+       "durationSeconds": 51,
+       "failed": [
+        "report-shape"
+       ]
+      }
+     ]
+    }
+   },
+   "document-report": {
+    "aggregates": {
+     "score": 0,
+     "passRate": 0,
+     "scoreWithout": 0.8333333333333334,
+     "passRateWithout": 0,
+     "delta": -0.8333333333333334
+    },
+    "arms": {
+     "with": [
+      {
+       "score": 0,
+       "costUsd": 0.159,
+       "durationSeconds": 30,
+       "failed": [
+        "fable-used (with-only)",
+        "false-claim",
+        "non-sequitur",
+        "report-shape",
+        "witnesses-dispatched (with-only)"
+       ]
+      },
+      {
+       "score": 0,
+       "costUsd": 0.159,
+       "durationSeconds": 31,
+       "failed": [
+        "fable-used (with-only)",
+        "false-claim",
+        "non-sequitur",
+        "report-shape",
+        "witnesses-dispatched (with-only)"
+       ]
+      },
+      {
+       "score": 0,
+       "costUsd": 0.155,
+       "durationSeconds": 27,
+       "failed": [
+        "fable-used (with-only)",
+        "false-claim",
+        "non-sequitur",
+        "report-shape",
+        "witnesses-dispatched (with-only)"
+       ]
+      }
+     ],
+     "without": [
+      {
+       "score": 0.833,
+       "costUsd": 0.106,
+       "durationSeconds": 29,
+       "failed": [
+        "report-shape"
+       ]
+      },
+      {
+       "score": 0.833,
+       "costUsd": 0.108,
+       "durationSeconds": 32,
+       "failed": [
+        "report-shape"
+       ]
+      },
+      {
+       "score": 0.833,
+       "costUsd": 0.111,
+       "durationSeconds": 32,
+       "failed": [
+        "report-shape"
+       ]
+      }
+     ]
+    }
+   },
+   "failure-startup": {
+    "aggregates": {
+     "score": 1,
+     "passRate": 1,
+     "scoreWithout": 0.7333333333333334,
+     "passRateWithout": 0,
+     "delta": 0.2666666666666666
+    },
+    "arms": {
+     "with": [
+      {
+       "score": 1,
+       "costUsd": 0.863,
+       "durationSeconds": 121,
+       "failed": []
+      },
+      {
+       "score": 1,
+       "costUsd": 0.893,
+       "durationSeconds": 140,
+       "failed": []
+      },
+      {
+       "score": 1,
+       "costUsd": 0.829,
+       "durationSeconds": 116,
+       "failed": []
+      }
+     ],
+     "without": [
+      {
+       "score": 0.6,
+       "costUsd": 0.178,
+       "durationSeconds": 40,
+       "failed": [
+        "report-shape",
+        "theory-not-in-brief"
+       ]
+      },
+      {
+       "score": 0.8,
+       "costUsd": 0.165,
+       "durationSeconds": 36,
+       "failed": [
+        "report-shape"
+       ]
+      },
+      {
+       "score": 0.8,
+       "costUsd": 0.179,
+       "durationSeconds": 55,
+       "failed": [
+        "report-shape"
+       ]
+      }
+     ]
+    }
+   },
+   "plan-contradiction": {
+    "aggregates": {
+     "score": 1,
+     "passRate": 1,
+     "scoreWithout": 0.75,
+     "passRateWithout": 0,
+     "delta": 0.25
+    },
+    "arms": {
+     "with": [
+      {
+       "score": 1,
+       "costUsd": 0.895,
+       "durationSeconds": 162,
+       "failed": []
+      },
+      {
+       "score": 1,
+       "costUsd": 0.857,
+       "durationSeconds": 134,
+       "failed": []
+      },
+      {
+       "score": 1,
+       "costUsd": 0.981,
+       "durationSeconds": 172,
+       "failed": []
+      }
+     ],
+     "without": [
+      {
+       "score": 0.75,
+       "costUsd": 0.21,
+       "durationSeconds": 57,
+       "failed": [
+        "report-shape"
+       ]
+      },
+      {
+       "score": 0.75,
+       "costUsd": 0.203,
+       "durationSeconds": 53,
+       "failed": [
+        "report-shape"
+       ]
+      },
+      {
+       "score": 0.75,
+       "costUsd": 0.224,
+       "durationSeconds": 56,
+       "failed": [
+        "report-shape"
+       ]
+      }
+     ]
+    }
+   },
+   "witness-contract": {
+    "aggregates": {
+     "score": 1,
+     "passRate": 1,
+     "scoreWithout": 0.125,
+     "passRateWithout": 0,
+     "delta": 0.875
+    },
+    "arms": {
+     "with": [
+      {
+       "score": 1,
+       "costUsd": 0.131,
+       "durationSeconds": 27,
+       "failed": []
+      },
+      {
+       "score": 1,
+       "costUsd": 0.133,
+       "durationSeconds": 27,
+       "failed": []
+      },
+      {
+       "score": 1,
+       "costUsd": 0.134,
+       "durationSeconds": 29,
+       "failed": []
+      }
+     ],
+     "without": [
+      {
+       "score": 0.125,
+       "costUsd": 0.063,
+       "durationSeconds": 10,
+       "failed": [
+        "boundary-found",
+        "contract",
+        "opinion-flagged"
+       ]
+      },
+      {
+       "score": 0.125,
+       "costUsd": 0.076,
+       "durationSeconds": 9,
+       "failed": [
+        "boundary-found",
+        "contract",
+        "opinion-flagged"
+       ]
+      },
+      {
+       "score": 0.125,
+       "costUsd": 0.063,
+       "durationSeconds": 10,
+       "failed": [
+        "boundary-found",
+        "contract",
+        "opinion-flagged"
+       ]
+      }
+     ]
+    }
+   }
+  }
+ },
+ "document-report-rerun": {
+  "commit": "7c7f2b5",
+  "claudeVersion": "2.1.285",
+  "startedAt": "2026-09-30T13:22:55.264Z",
+  "durationSeconds": 150,
+  "costUsd": 2.2,
+  "aggregates": {
+   "casesTotal": 1,
+   "casesPassed": 0,
+   "overallScore": 0.9444444444444445,
+   "overallPassRate": 0.6666666666666666,
+   "meanDelta": 0.11111111111111116
+  },
+  "cases": {
+   "document-report": {
+    "aggregates": {
+     "score": 0.9444444444444445,
+     "passRate": 0.6666666666666666,
+     "scoreWithout": 0.8333333333333334,
+     "passRateWithout": 0,
+     "delta": 0.11111111111111116
+    },
+    "arms": {
+     "with": [
+      {
+       "score": 1,
+       "costUsd": 0.862,
+       "durationSeconds": 137,
+       "failed": []
+      },
+      {
+       "score": 1,
+       "costUsd": 0.9,
+       "durationSeconds": 150,
+       "failed": []
+      },
+      {
+       "score": 0.833,
+       "costUsd": 0.114,
+       "durationSeconds": 33,
+       "failed": [
+        "fable-used (with-only)",
+        "report-shape",
+        "witnesses-dispatched (with-only)"
+       ]
+      }
+     ],
+     "without": [
+      {
+       "score": 0.833,
+       "costUsd": 0.105,
+       "durationSeconds": 29,
+       "failed": [
+        "report-shape"
+       ]
+      },
+      {
+       "score": 0.833,
+       "costUsd": 0.11,
+       "durationSeconds": 32,
+       "failed": [
+        "report-shape"
+       ]
+      },
+      {
+       "score": 0.833,
+       "costUsd": 0.11,
+       "durationSeconds": 31,
+       "failed": [
+        "report-shape"
+       ]
+      }
+     ]
+    }
+   }
+  }
+ }
+}
