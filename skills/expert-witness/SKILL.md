@@ -1,6 +1,6 @@
 ---
 name: expert-witness
-description: Use when a spec, plan or design has just been written and is about to be acted on; when a failure has resisted two fix attempts; when a change is hard to undo or touches security; or when the user asks for an independent, blind or multi-model review, audit or critique of code, a plan, a document (a report, a proposal, a piece of writing) or a failure.
+description: Use when the user asks for a review, audit or critique of code, a plan, a document (a report, a proposal, a board paper, a piece of writing) or a failure that is independent, blind, multi-model or in detail, including a plain "critique it in detail" or "review this before it goes out" about something someone wrote; when a spec, plan or design has just been written and is about to be acted on; when a failure has resisted two fix attempts; or when a change is hard to undo or touches security.
 ---
 
 # Expert witness
@@ -30,11 +30,13 @@ reason to skip it.
    else `mktemp -d`. Never inside the reviewed repo or next to the reviewed
    file. With no shell, writes are usually allowed only inside the working
    directory, so try `<working directory>/expert-witness-run-<n>/` first.
-   It is the right place only when the working directory is not inside a
-   git repository (no `.git` in it or in any parent) and does not directly
-   hold the reviewed file. If a write is refused, try another place outside
-   the subject. Only when no place accepts a write, say so and stop. Do not
-   review it yourself instead.
+   It is the right place when the working directory is not inside the
+   reviewed repository (the reviewed repo may sit below it, as `./repo`
+   does) and does not directly hold the reviewed file. A `.git` that
+   belongs to some other repository above the working directory does not
+   matter. If a write is refused, try another place outside the subject.
+   Only when no place accepts a write, say so and stop. Do not review it
+   yourself instead.
 
 2. **Brief.** Copy `brief-template.md` to `<run>/brief.md` and fill every
    slot. The request is the user's own words, quoted exactly. Material is
@@ -96,10 +98,17 @@ reason to skip it.
    header.
 
 9. **Report.** Fill `report-template.md` in the user's language and save it
-   as `<run>/report.md`. Your final message is that filled template itself,
-   every section present (write "None" in an empty one): which witnesses answered by name and model (S sonnet, O opus,
-   F fable), and for each finding its location, the quoted evidence and the
-   proposed fix. A prose summary that points to the file is not the report.
+   as `<run>/report.md`. Your final message is that filled template itself.
+   Keep the template's headings, in its order, translated word for word
+   into the user's language and never renamed or merged: "Changes made by
+   witnesses", "Diagnosis" (failure only), "Confirmed findings",
+   "Disagreements", "Does not hold", "Could not verify", "Missing
+   witnesses". Do not replace them with your own ("Findings", "Rejected
+   findings", "Summary"). Every section is present; write "None" in an
+   empty one. The header names which witnesses answered by model (S sonnet,
+   O opus, F fable), and each finding, whatever its severity, has its
+   location, the quoted evidence and the proposed fix. A prose summary that
+   points to the file is not the report.
 
 ## Disputes
 
