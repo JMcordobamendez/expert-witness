@@ -1,6 +1,6 @@
 ---
 name: expert-witness
-description: Use when the user asks for a review, audit or critique of code, a plan, a document (a report, a proposal, a board paper, a piece of writing) or a failure that is independent, blind, multi-model or in detail, including a plain "critique it in detail" or "review this before it goes out" about something someone wrote; when a spec, plan or design has just been written and is about to be acted on; when a failure has resisted two fix attempts; or when a change is hard to undo or touches security.
+description: Use when the user asks for an independent, blind, multi-model or detailed review, audit or critique of code, a plan, a document (a report, a proposal, a board paper, a piece of writing) or a failure, including a plain "critique it in detail" or "review this before it goes out" about something someone wrote; when a spec, plan or design has just been written and is about to be acted on; when a failure has resisted two fix attempts; or when a change is hard to undo or touches security.
 ---
 
 # Expert witness
@@ -30,11 +30,12 @@ reason to skip it.
    else `mktemp -d`. Never inside the reviewed repo or next to the reviewed
    file. With no shell, writes are usually allowed only inside the working
    directory, so try `<working directory>/expert-witness-run-<n>/` first.
-   It is the right place when the working directory is not inside the
-   reviewed repository (the reviewed repo may sit below it, as `./repo`
-   does) and does not directly hold the reviewed file. A `.git` that
-   belongs to some other repository above the working directory does not
-   matter. If a write is refused, try another place outside the subject.
+   It is the right place when the working directory is not inside the git
+   repository that contains the reviewed material (that repository may sit
+   below it). A `.git` above the working directory whose repository does
+   not contain the reviewed material does not matter, and neither does a
+   reviewed file that sits directly in a working directory outside any
+   such repository. If a write is refused, try another place outside the subject.
    Only when no place accepts a write, say so and stop. Do not review it
    yourself instead.
 
@@ -101,14 +102,16 @@ reason to skip it.
    as `<run>/report.md`. Your final message is that filled template itself.
    Keep the template's headings, in its order, translated word for word
    into the user's language and never renamed or merged: "Changes made by
-   witnesses", "Diagnosis" (failure only), "Confirmed findings",
-   "Disagreements", "Does not hold", "Could not verify", "Missing
-   witnesses". Do not replace them with your own ("Findings", "Rejected
-   findings", "Summary"). Every section is present; write "None" in an
-   empty one. The header names which witnesses answered by model (S sonnet,
-   O opus, F fable), and each finding, whatever its severity, has its
-   location, the quoted evidence and the proposed fix. A prose summary that
-   points to the file is not the report.
+   witnesses", "Diagnosis", "Confirmed findings", "Disagreements", "Does
+   not hold", "Could not verify", "Missing witnesses". Do not replace them
+   with your own ("Findings", "Rejected findings", "Summary"). "Diagnosis"
+   appears only for a failure; every other section is always present, with
+   the user's word for "None" when empty. The header names which witnesses
+   answered by model (S sonnet, O opus, F fable). Every finding, in every
+   section and whatever its severity, has its location and the quoted
+   evidence; a confirmed one also has one proposed fix (when the choice is
+   the user's, recommend one option rather than listing several). A prose
+   summary that points to the file is not the report.
 
 ## Disputes
 

@@ -6,10 +6,10 @@ Kind: <kind> · Witnesses: <S/O/F that answered> · Run: <run directory>
 
 ## Changes made by witnesses
 <what changed and where if the after snapshot differs; say so if the
-snapshot was limited or unavailable; otherwise "None">
+snapshot was limited or unavailable; otherwise the user's word for "None">
 
 ## Diagnosis
-<failure only: the confirmed cause, or the competing ones with their evidence>
+<failure only, omit the section otherwise: the confirmed cause, or the competing ones with their evidence>
 
 ## Confirmed findings
 <most severe first; each: title, seen by (S/O/F), location, evidence, problem, proposal>

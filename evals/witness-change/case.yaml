@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: witness-change
-description: A file in the reviewed repo changes while the witnesses run (an eval-only helper plugin's SubagentStop hook stands in for a witness that edits); the after snapshot must catch it and the report must say so
+description: A file in the reviewed repo changes while the witnesses run (an eval-only helper plugin's SubagentStop hook stands in for a witness that edits); the after snapshot must catch it and the report must say so. The no-plugin arm loads no helper, so nothing changes there and its delta is not like-for-like
 tags: [snapshot]
 runs: 3
 plugins: ["../..", "helper"]

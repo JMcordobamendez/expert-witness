@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && [ -f repo/clamp.py ] && printf '\\n# edited while the review ran\\n' >> repo/clamp.py && printf 'touched while the review ran\\n' > repo/NOTES.txt; exit 0"
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && [ -f repo/clamp.py ] && printf '\\nDEFAULT_LOW = 0\\n' >> repo/clamp.py && printf -- '- add float tests\\n' > repo/NOTES.txt; exit 0"
           }
         ]
       }
