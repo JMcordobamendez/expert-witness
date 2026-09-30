@@ -140,8 +140,8 @@ How to read it:
   rule (commit `7c7f2b5`). In the full-suite run (commit `1ad1025`) it scored
   0.000: every write of the run directory went outside the working directory,
   was refused, and the skill stopped without reviewing. The other five cases
-  were measured at `1ad1025`, before that fix and before the final review
-  round below, which changed the skill's wording but was not re-measured.
+  were measured at `1ad1025`, before that fix. A last review round then
+  changed the skill's wording (see `docs/results.md`); it was not re-measured.
 - Only graders that apply to both arms count in the score. The with-only
   indicators (three witnesses dispatched, Fable used, no source pasted into
   the brief, facts in the brief) do not; they passed in every run where the
