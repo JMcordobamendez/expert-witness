@@ -91,8 +91,8 @@ who raised or rejected it. There are no "do you approve my synthesis" rounds.
 
 Each run is three full subagent reviews (one of them on Opus) plus the
 session's own verification. In the eval suite below a with-plugin run cost
-about five times as much as the session reviewing alone (mean $0.93 per run
-that used the skill, against $0.18). When you invoke it by hand, use it where
+about five and a half times as much as the session reviewing alone (mean
+$0.98 per run, against $0.18). When you invoke it by hand, use it where
 a wrong verdict costs more than the review; the three automatic moments run
 it regardless of cost. The trigger is deliberately wide for documents ("critique
 it in detail" fires it), so ask for a quick look instead when that is all you
@@ -133,38 +133,42 @@ Results (2026-09-30, orchestrator on Opus, no shell anywhere; mean score over 3 
 
 | Case | With plugin | Without | Delta | With-plugin runs passed |
 |---|---|---|---|---|
-| clean-control | 0.750 | 0.500 | +0.250 | 2 of 3 |
-| code-offbyone | 1.000 | 0.500 | +0.500 | 3 of 3 |
-| document-report | 0.944 | 0.833 | +0.111 | 2 of 3 |
-| failure-startup | 1.000 | 0.733 | +0.267 | 3 of 3 |
+| clean-control | 1.000 | 0.500 | +0.500 | 3 of 3 |
+| code-offbyone | 1.000 | 0.750 | +0.250 | 3 of 3 |
+| document-report | 1.000 | 0.833 | +0.167 | 3 of 3 |
+| document-spanish | 1.000 | 0.833 | +0.167 | 3 of 3 |
+| failure-startup | 1.000 | 0.800 | +0.200 | 3 of 3 |
 | plan-contradiction | 1.000 | 0.750 | +0.250 | 3 of 3 |
+| plan-theory | 1.000 | 0.600 | +0.400 | 3 of 3 |
+| witness-change | 1.000 | 0.083 | +0.917 | 3 of 3 |
 | witness-contract | 1.000 | 0.125 | +0.875 | 3 of 3 |
 
 How to read it:
 
-- document-report comes from a rerun after a fix to the skill's run-directory
-  rule (commit `7c7f2b5`). In the full-suite run (commit `1ad1025`) it scored
-  0.000: every write of the run directory went outside the working directory,
-  was refused, and the skill stopped without reviewing. The other five cases
-  were measured at `1ad1025`, before that fix. A last review round then
-  changed the skill's wording (see `docs/results.md`); it was not re-measured.
+- Six cases come from the full-suite run at commit `196ebd2`. The last fix
+  (commit `8508aa9`, the no-shell run-directory rule) was measured by rerunning
+  document-report and document-spanish, which it had broken (1 of 3 each at
+  `196ebd2`: the skill refused its only writable directory and stopped), and
+  code-offbyone as a control. Those three rows are from `8508aa9`, where all
+  nine with-plugin runs wrote the brief in the working directory at the
+  first try. The fix only changes where the run directory goes, and the
+  other six cases passed 3 of 3 at `196ebd2` with it placed correctly.
 - Only graders that apply to both arms count in the score. The with-only
   indicators (three witnesses dispatched, Fable used, no source pasted into
-  the brief, facts in the brief) do not; they passed in every run where the
-  skill fired. So a with-plugin run where the skill did not fire can still
-  score 0.83 (document-report, run 3).
-- witness-contract tests the witness agent itself. Without the plugin the
-  agent does not exist, so its +0.875 is not a like-for-like comparison.
+  the brief, facts in the brief, the after snapshot listing the changed file)
+  passed in every with-plugin run above.
+- witness-contract and witness-change are not like-for-like. Without the
+  plugin the witness agent does not exist, and the helper hook that changes
+  files is not loaded, so there is nothing to catch.
 - Without the plugin the session usually finds the planted defect too; what it
   loses is mostly the report (no named reviewers, no confirmed / rejected
-  split). In some runs the judge also rejects its framing (in code-offbyone it
-  offered two fixes instead of calling the `<` the bug; in clean-control it
-  listed NaN as should-fix), and in one failure-startup run it passed its own
-  theory ("file permissions/umask") to the reviewer.
-- The two with-plugin failures: in document-report the skill did not fire in
-  one run (the prompt only says "critique it in detail"); in clean-control the
-  judge failed a report whose confirmed findings were all minor, and that
-  report also did not use the template's section names.
+  split), which is what `report-shape` measures. The independence graders
+  are where it differs in kind: in plan-theory the session put its own
+  theory (the table lock) into its reviewer's prompt in 3 of 3 runs, in both
+  full-suite runs; with the plugin it never did.
+- clean-control was flaky before (2 of 3 at `1ad1025`); it passed 3 of 3 in
+  both full-suite runs after the report step started forcing the template's
+  headings.
 
 Details, traces and every grader change with its evidence are in
 [`docs/results.md`](docs/results.md); the no-plugin baseline is described in
@@ -189,12 +193,13 @@ Details, traces and every grader change with its evidence are in
 - **The snapshot detects, it does not prevent.** Witnesses have the same tools
   as the session and are told to change nothing. That is an instruction, not
   a sandbox; the before/after snapshot is what catches a breach.
-- **Triggering is not guaranteed.** Asked to "critique" a document without
-  the words "independent" or "review", the session used the skill in 2 of 3
-  runs. Type `/expert-witness` when you want it for sure.
+- **Triggering is not guaranteed.** The description now covers "critique it
+  in detail", and document-report fired the skill in 9 of 9 runs after that
+  change (2 of 3 before). No case checks that it stays quiet on a request it
+  should not take. Type `/expert-witness` when you want it for sure.
 - **Graders are partly LLM judges** (Haiku by default) and three runs per arm
-  is a small sample. `clean-control` has been flaky: the judge sometimes fails
-  a report whose confirmed findings are all minor.
+  is a small sample: 3 of 3 separates a solid case from a lucky one less
+  well than it looks. `clean-control` failed 1 of 3 at an earlier commit.
 - **Verification is only as good as the session's reading.** A finding the
   session cannot check is reported as "could not verify", not dropped and not
   confirmed.

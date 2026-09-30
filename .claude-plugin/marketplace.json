@@ -7,7 +7,7 @@
       "name": "expert-witness",
       "source": "./",
       "description": "Blind multi-model review: three witnesses, verified findings.",
-      "version": "0.1.0"
+      "version": "1.0.0"
     }
   ]
 }

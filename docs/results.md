@@ -134,5 +134,159 @@ Fixed in one round, after the measurements above (so not re-measured):
 
 Left unfixed:
 
-- `evals/code-offbyone/fixture/window.py` (and the witness-contract copy): the docstring contradicts itself ("within the last n days, today included" is n days; "exactly n days before today is included" is n+1). A no-plugin run pointed this out and the `offbyone` judge failed it. The fixture should say "from n days before today through today, both ends included"; changing it needs a rerun of both cases, which was not done.
+- (Fixed in the next section, commit `f0e53fd`.) `evals/code-offbyone/fixture/window.py` (and the witness-contract copy): the docstring contradicts itself ("within the last n days, today included" is n days; "exactly n days before today is included" is n+1). A no-plugin run pointed this out and the `offbyone` judge failed it. The fixture should say "from n days before today through today, both ends included"; changing it needs a rerun of both cases, which was not done.
 - The five cases other than document-report were not rerun after the step-1 fix or this round.
+
+## Session 2: fixture fix, new cases, final runs
+
+All runs below: `--allow-tools Write Edit`, no Bash anywhere, 3 runs per arm,
+default ablation (with-without). Total cost of this session's evals: $68.49.
+
+### Fixture docstring (commit `f0e53fd`)
+
+`last_n_days` in `evals/code-offbyone/fixture/window.py` and the
+witness-contract copy now says "Return the entries dated from n days before
+today through today, both ends included. An entry dated exactly n days before
+today is included, so the window spans n + 1 calendar days." `start <
+e["date"]` is still the single planted bug; both fixture tests pass with it,
+and an entry dated `today - n` is still dropped. Graders unchanged.
+
+- witness-contract: 1.000 / 0.125, 3 of 3 ($0.63).
+- code-offbyone, first rerun: **0.000 / 0.833** ($1.18). Not the fixture: see
+  the next heading.
+
+### Step 1 regression 1: a parent `.git` (commit `6becd27`)
+
+Trace (all three with-plugin runs): the orchestrator wrote `brief.md` to
+`/tmp/claude-eval-<id>/expert-witness-run-1/` and `/tmp/expert-witness-run-1/`,
+both denied ("Permission to use Write has been denied because Claude Code is
+running in don't ask mode"), and stopped: "The only folders left are inside git
+repos (your working directory and the home directory above it)". The eval
+harness keeps a `.git` in `home/`, the parent of the working directory
+`home/cwd`, and the `7b3b1ea` wording of step 1 ("not inside a git repository
+(no `.git` in it or in any parent)") ruled the working directory out. So every
+no-shell run since `7b3b1ea` stopped before dispatching; that commit was never
+measured. Fix: the rule forbade only the reviewed repository. Rerun:
+code-offbyone **1.000 / 0.833**, 3 of 3 ($3.32). The no-plugin arm rose from
+0.500 to 0.833: with the unambiguous docstring the judge accepts its boundary
+finding.
+
+The same commit forced the template's headings in step 9 (clean-control run 2
+at `1ad1025` used "Findings" / "Rejected findings") and widened the
+description to a plain "critique it in detail" (document-report fired the
+skill in 2 of 3 runs at `7c7f2b5`).
+
+### New cases (commit `fdbc07f`)
+
+- `document-spanish`: a Spanish management report claims logistics costs fell
+  every quarter; the CSV shows T3 (381 000 €) above T2 (365 000 €). Graders:
+  `false-claim` (llm, 3), `spanish` (llm, 2: headings and prose in Spanish),
+  `report-shape`, plus the with-only dispatch and Fable indicators.
+- `plan-theory`: a migration plan whose step 3 drops `users.email` before
+  step 4 backfills `contacts.email` from it. The prompt hands the orchestrator
+  its own theory (the step 5 table lock, "the rest is fine").
+  `theory-not-in-brief` (regex, both arms, not_contains) checks the brief's
+  Write/Edit and every Agent prompt; `drop-before-backfill` (llm, 3).
+- `witness-change`: the case loads an eval-only helper plugin
+  (`evals/witness-change/helper`, `plugins: ["../..", "helper"]`) whose
+  `SubagentStop` hook appends a line to `repo/clamp.py` and creates
+  `repo/NOTES.txt` while the witnesses run. `change-reported` (llm, 3) needs
+  the report to name the change. The hook runs as a harness hook with `sh`,
+  outside the agent's sandbox; no Bash tool is granted to anyone, so R1 holds.
+  Project-level `.claude/` settings and hooks are not loaded in eval runs, so
+  a plugin was the only way to change a file mid-run.
+- Skipped: a real witness that edits. The witness agent is told to change
+  nothing and cannot be replaced in a case, so the hook stands in for it.
+  Retry, missing witnesses and disputes are not covered; a hook that deletes a
+  witness report could simulate a lost report, and was left for later.
+
+Smoke run of witness-change (1 run per arm, $1.11): with 1.0, without 0.
+
+### Full suite at `fdbc07f` (1164 s, $27.50)
+
+All nine cases pass: clean-control 1.000 / 0.000, code-offbyone 0.917 / 0.833,
+document-report 1.000 / 0.833, document-spanish 1.000 / 0.833,
+failure-startup 1.000 / 0.800, plan-contradiction 1.000 / 0.750, plan-theory
+1.000 / 0.600, witness-change 1.000 / 0.000, witness-contract 1.000 / 0.125.
+26 of 27 with-plugin runs perfect. document-report fired the skill 3 of 3.
+
+The one failure: code-offbyone run 1, `report-shape` judge FAIL x3. The report
+was complete, but F1's proposal was "Decide which behaviour you want" with two
+options, and the "Could not verify" items had no location or evidence;
+criterion (b) asks for location, quoted evidence and a proposed fix for each
+finding. The grader is right; step 9 was tightened (next heading).
+
+### Final whole-branch review (fresh subagent on Opus) and fixes (commit `196ebd2`)
+
+Confirmed and fixed:
+- witness-change could pass for the wrong reason: the hook's text ("edited
+  while the review ran") announced itself. It now appends neutral text
+  (`DEFAULT_LOW = 0`, a NOTES.txt todo), and a new with-only regex
+  `snapshot-caught` needs a Write of `after.txt` that lists `NOTES.txt`.
+  Checked on the three with-plugin traces of the `fdbc07f` run: all match.
+- plan-theory's regex only caught the literal word "lock"; a paraphrase ("the
+  main risk is step 5 on a 2.3-million-row table") passed. It now also
+  catches `LOCK`, `step 5`, `2.3`, `million`, `NOT NULL`, "real risk" and "rest
+  is fine". Stricter: still absent in the three with-plugin traces, still
+  present in the three no-plugin ones.
+- Step 1 used the eval layout (`./repo`) as its example and did not define
+  "reviewed repository" for a plan or document; step 9 kept the English
+  "None" in translated reports and was unclear about "Diagnosis"; the
+  description read "a failure that is ... in detail"; README and HANDOFF were
+  stale. All reworded.
+
+Declined: making `change-reported` with-only. With-only graders do not count
+in the score, so the case would pass or fail on `report-shape` alone and never
+on the change it exists to test. It stays scored in both arms; its delta is
+recorded as not like-for-like (the no-plugin arm loads no helper).
+
+### Full suite at `196ebd2` (1118 s, $25.53)
+
+Seven cases 3 of 3: clean-control 1.000 / 0.500, code-offbyone 1.000 / 0.750,
+failure-startup 1.000 / 0.800, plan-contradiction 1.000 / 0.750, plan-theory
+1.000 / 0.600, witness-change 1.000 / 0.083, witness-contract 1.000 / 0.125.
+
+**Step 1 regression 2:** document-report 0.333 and document-spanish 0.444,
+1 of 3 each. In the four failing runs the orchestrator wrote `brief.md` to
+`/tmp/expert-witness-run-1/` and to the parent of the working directory
+(denied), never to the working directory, and stopped. The review-round
+wording ("not inside the git repository that contains the reviewed material")
+was read against the harness's `home/.git`, which does contain `./board` and
+`./informe`. The code cases were unaffected because the reviewed repo is
+`./repo`, below the working directory.
+
+Fix (commit `8508aa9`, iteration 1 of 3 for both cases): a rule the
+orchestrator can check without a shell. The working directory is wrong only if
+it holds a `.git` itself or the request names a repository it is inside; a
+`.git` further up that the request never mentions does not count. "Next to the
+reviewed file" was dropped; the spec only forbids the reviewed repo. Known
+cost: without a shell, working in a subdirectory of the user's repo and asking
+about a document without naming the repo, the run directory can land inside
+that repo. With a shell the scratchpad or `mktemp -d` is used and this rule
+does not apply.
+
+Reruns at `8508aa9`: document-report 1.000 / 0.833 and document-spanish
+1.000 / 0.833, 3 of 3 each ($5.86); code-offbyone as a control 1.000 / 0.750,
+3 of 3 ($3.36). All nine with-plugin runs wrote the brief in the working
+directory at the first try.
+
+### Final table
+
+| Case | With | Without | Delta | With-plugin runs | Commit |
+|---|---|---|---|---|---|
+| clean-control | 1.000 | 0.500 | +0.500 | 3 of 3 | `196ebd2` |
+| code-offbyone | 1.000 | 0.750 | +0.250 | 3 of 3 | `8508aa9` |
+| document-report | 1.000 | 0.833 | +0.167 | 3 of 3 | `8508aa9` |
+| document-spanish | 1.000 | 0.833 | +0.167 | 3 of 3 | `8508aa9` |
+| failure-startup | 1.000 | 0.800 | +0.200 | 3 of 3 | `196ebd2` |
+| plan-contradiction | 1.000 | 0.750 | +0.250 | 3 of 3 | `196ebd2` |
+| plan-theory | 1.000 | 0.600 | +0.400 | 3 of 3 | `196ebd2` |
+| witness-change | 1.000 | 0.083 | +0.917 | 3 of 3 | `196ebd2` |
+| witness-contract | 1.000 | 0.125 | +0.875 | 3 of 3 | `196ebd2` |
+
+On the eight skill cases a with-plugin run cost $0.98 on average against
+$0.18 without (about 5.5 times; 24 runs each, from the rows above).
+
+Lesson recorded: both regressions came from step 1 wording that was changed
+and not measured, or measured only on some cases. Any change to step 1 needs
+a rerun of at least one code case and one document case.

@@ -1,12 +1,12 @@
-# Handoff: state of expert-witness v1 (2026-09-30)
+# Handoff: state of expert-witness 1.0.0 (2026-09-30)
 
 Read this first when you pick the project up in a new session.
 
 ## Where the work is
 
-- Branch `feat/v1`, draft PR #1 (JMcordobamendez/expert-witness). `main` has
-  only the initial commit. Nothing is merged. Do not merge or mark the PR
-  ready unless Josemi asks.
+- Branch `feat/v1`, PR #1 (JMcordobamendez/expert-witness), marked ready for
+  review; version 1.0.0. `main` has only the initial commit. Nothing is
+  merged: Josemi does the merge. Do not merge.
 - If your session is assigned a different branch name, create it from
   `origin/feat/v1` (`git fetch origin feat/v1 && git checkout -B <branch>
   origin/feat/v1`); otherwise keep working on `feat/v1` so PR #1 stays current.
@@ -22,7 +22,7 @@ Read this first when you pick the project up in a new session.
 4. `docs/results.md`: every eval run, every grader change with its trace
    evidence, both review rounds, and the deviations from the plan.
 5. `docs/eval-runs/2026-09-30-summary.json`: per-run scores, costs and failed
-   graders for the two final runs (the raw `--json` output and the traces
+   graders for every run since `1ad1025`, keyed by case and commit (the raw `--json` output and the traces
    lived in `/tmp` and are gone; `docs/.results*.json` are gitignored).
 
 ## Standing rules
@@ -40,7 +40,7 @@ Read this first when you pick the project up in a new session.
   must pass before each push.
 - Commits end with the session's attribution lines.
 
-Full suite (about 11 minutes, about $15):
+Full suite (9 cases, about 19 minutes, about $26):
 
 ```
 claude plugin eval . --scaffold --trust-plugin --no-publish -j 4 --keep-temp \
@@ -55,38 +55,43 @@ git inside them).
 
 | Case | With | Without | With-plugin runs passed | Measured at |
 |---|---|---|---|---|
-| clean-control | 0.750 | 0.500 | 2 of 3 | `1ad1025` |
-| code-offbyone | 1.000 | 0.500 | 3 of 3 | `1ad1025` |
-| document-report | 0.944 | 0.833 | 2 of 3 | `7c7f2b5` |
-| failure-startup | 1.000 | 0.733 | 3 of 3 | `1ad1025` |
-| plan-contradiction | 1.000 | 0.750 | 3 of 3 | `1ad1025` |
-| witness-contract | 1.000 | 0.125 | 3 of 3 | `1ad1025` |
+| clean-control | 1.000 | 0.500 | 3 of 3 | `196ebd2` |
+| code-offbyone | 1.000 | 0.750 | 3 of 3 | `8508aa9` |
+| document-report | 1.000 | 0.833 | 3 of 3 | `8508aa9` |
+| document-spanish | 1.000 | 0.833 | 3 of 3 | `8508aa9` |
+| failure-startup | 1.000 | 0.800 | 3 of 3 | `196ebd2` |
+| plan-contradiction | 1.000 | 0.750 | 3 of 3 | `196ebd2` |
+| plan-theory | 1.000 | 0.600 | 3 of 3 | `196ebd2` |
+| witness-change | 1.000 | 0.083 | 3 of 3 | `196ebd2` |
+| witness-contract | 1.000 | 0.125 | 3 of 3 | `196ebd2` |
 
-Eval spend so far: $17.24.
+`8508aa9` changed only step 1 (run directory); see `docs/results.md`,
+"Session 2". witness-change and witness-contract deltas are not like-for-like.
+
+Eval spend so far: $85.73 ($17.24 in session 1, $68.49 in session 2). A full
+suite now takes about 19 minutes and $26.
+
+## Standing lesson
+
+Step 1 (the no-shell run directory) broke every skill case twice when its
+wording changed without a rerun. The harness keeps a `.git` in the home
+directory above the working directory. Any change to step 1 needs a rerun of
+at least one code case and one document case.
 
 ## Open items, suggested order
 
-1. **Fix the code-offbyone fixture docstring** (`evals/code-offbyone/fixture/window.py`
-   and the copy in `evals/witness-contract/fixture/`). It contradicts itself:
-   "within the last n days, today included" is n days, "exactly n days before
-   today is included" is n+1. Proposed line: `"""Return the entries dated from
-   n days before today through today, both ends included.` Fix the fixture,
-   not the grader.
-2. **Rerun the full suite** at the current head. The skill wording changed
-   twice after the `1ad1025` measurement (`7c7f2b5` run-directory rule and
-   `7b3b1ea` final review fixes); only document-report was re-measured, and
-   only after the first of those.
-3. **clean-control flakiness.** One run failed `no-invented`: the Haiku judge
-   rejected a report whose confirmed findings were all minor; that report also
-   used "Findings" / "Rejected findings" instead of the template's sections.
-   Look at whether step 9 of `SKILL.md` needs to insist harder on the template
-   headings before touching the grader.
-4. **Triggering.** document-report's prompt ("critique it in detail") fired
-   the skill in 2 of 3 runs. Consider the skill description wording.
-5. **Paths no eval exercises** (listed in README Limitations): retry, missing
-   and insufficient witnesses, disputes, launching unasked, an after snapshot
-   that catches a change, non-English reports, a witness Write inside the repo.
-   Adding cases is optional; each costs about $2 to $3 per 3+3 runs.
-6. After the next full run: update the table in `README.md`,
-   `docs/results.md`, this file and the summary JSON, then post a Spanish
-   summary on PR #1.
+1. **Measure with a shell.** Every number is from runs without Bash (R1:
+   socat missing on Josemi's machine). The real path (git snapshots,
+   witnesses running tests) is unmeasured; a CI runner or a machine with socat
+   could run the suite with `--allow-tools Bash`.
+2. **A negative triggering case.** The description was widened to "critique
+   it in detail"; no case checks that the skill stays quiet on a request it
+   should not take (a quick question about a file, a one-line fix).
+3. **Paths no eval exercises:** retry, missing witnesses and the insufficient
+   mark, disputes, launching unasked. A helper-plugin hook like
+   witness-change's could delete a witness report to exercise retry.
+4. **Sample size.** Three runs per arm with a Haiku judge; run `--runs 5` on
+   any case before drawing conclusions from one flaky run.
+5. **Known trade-off in step 1:** without a shell, in a subdirectory of the
+   user's repo, a document review that does not name the repo can put the run
+   directory inside it.
