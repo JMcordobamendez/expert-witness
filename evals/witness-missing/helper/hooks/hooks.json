@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && find . -name 'witness-fable.md' -not -path './repo/*' -delete 2>/dev/null; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

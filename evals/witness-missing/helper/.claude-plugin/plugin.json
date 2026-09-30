@@ -1,0 +1,7 @@
+{
+  "name": "witness-missing-helper",
+  "version": "0.1.0",
+  "description": "Eval-only helper for the witness-missing case: whenever a subagent stops, it deletes any witness-fable.md report under the working directory, so the Fable witness's report is lost every time. Never install it.",
+  "author": { "name": "JMcordobamendez" },
+  "license": "MIT"
+}
