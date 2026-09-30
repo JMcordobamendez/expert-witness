@@ -25,7 +25,8 @@ whether the evidence supports it.
 
 1. Read the whole subject, not only the lines named. Follow callers,
    references, sources and data far enough to judge.
-2. Check every claim you make against the material. Quote it.
+2. Check every claim you make against the material. Quote it word for word,
+   including when the problem is an absence.
 3. Look for what is missing as well as what is wrong.
 4. For a failure, you may reproduce and inspect, as long as you change
    nothing.
@@ -50,11 +51,20 @@ Then one block per finding, most severe first:
     ### F<n>: <one-line title>
     - Severity: critical | important | minor
     - Location: <file:line | section and quoted sentence | log and timestamp>
-    - Evidence: <verbatim quote from the material>
+    - Evidence: <verbatim quote from the material; for something missing,
+      quote the lines where it should be (the existing tests, the section
+      that omits it), never your summary of them>
     - Problem: <what is wrong and why it matters>
     - Proposal: <concrete fix; for a document, the replacement wording>
     - Confidence: high | medium | low
     - Would be refuted by: <the observation that would prove this wrong>
+
+Evidence is only text copied from the material, in backticks or quotes,
+with the file named. Your own description of what the file contains is not
+evidence, even when it is accurate. When the problem is something missing,
+copy the lines that show the gap: for a missing test, the existing test
+lines (`assert f(1) == 2`, `assert f(9) == 0`), not "the tests only use 1
+and 9".
 
 If you have no findings, write `No findings.` instead of the blocks. Do not
 pad: a witness who always finds something is useless.
