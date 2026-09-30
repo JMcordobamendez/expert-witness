@@ -290,3 +290,135 @@ $0.18 without (about 5.5 times; 24 runs each, from the rows above).
 Lesson recorded: both regressions came from step 1 wording that was changed
 and not measured, or measured only on some cases. Any change to step 1 needs
 a rerun of at least one code case and one document case.
+
+## Session 3: Opus judge, anchoring, negative trigger, lost witness
+
+Work on branch `claude/fix-fixture-docstring-qulkpg`, based on `feat/v1` at
+`c2e723a`. Every run in this section used `--judge-model opus` (the
+harness default is Haiku), with the usual flags and no Bash.
+
+### New cases (commit `efc8e16`)
+
+- `failure-anchored`: an orders service fails at boot with
+  `ConnectionRefusedError`. The real cause is that `app/settings.py` looks
+  for `app/config/app.env`, the file is `config/app.env`, the loader skips
+  a missing file silently and `DB_PORT` falls back to `5433` while
+  PostgreSQL listens on `5432`. The session is handed a plausible wrong
+  theory: a boot-time race with PostgreSQL (the unit really has no
+  `After=postgresql.service`). The request adds a decisive fact: a manual
+  start the next morning failed the same way. `cause` (llm, weight 3, both
+  arms) fails the run if the diagnosis's main cause or main fix is the race,
+  ordering or retries; `theory-not-in-brief` (regex, both arms) as in
+  failure-startup.
+- `failure-anchored-weak`: the same, without the manual start in the request
+  or the log, so only the code and config rule the race out.
+- `quick-look`: negative trigger. "Quick one: is the title of
+  ./board/report.md OK for a board paper? A line or two is enough." on the
+  document-report fixture. `no-review-run` (regex, both arms) fails on any
+  Skill call naming expert-witness or any `expert-witness:witness` dispatch;
+  `short-answer` (llm) fails a full review.
+- `witness-missing`: the clamp repo, plus an eval-only helper plugin whose
+  SubagentStop hook deletes every `witness-fable.md` under the working
+  directory. `fable-retried` (tool_used, with-only): at least two Agent calls
+  naming `witness-fable`; `missing-reported` (llm, weight 3, both arms, like
+  witness-change's `change-reported`): Fable named as missing, Sonnet and
+  Opus as answering, not marked insufficient.
+
+Smoke run of three of them before the commit ($10.72): all 3 of 3 with the
+plugin. The traces showed each grader was not passing vacuously: in
+witness-missing every with-plugin run dispatched Fable twice and its report
+header read "Witnesses: S, O (F missing)"; in quick-look no run fired the
+skill; in failure-anchored the no-plugin session itself dispatched a
+general-purpose reviewer without the theory ("a second agent that hadn't
+seen my theory") and both arms found the port.
+
+### Full suite at `efc8e16`, Opus judge (1918 s, $46.11)
+
+| Case | With | Without | With-plugin runs passed |
+|---|---|---|---|
+| clean-control | 1.000 | 0.250 | 3 of 3 |
+| code-offbyone | 1.000 | 0.750 | 3 of 3 |
+| document-report | 1.000 | 0.833 | 3 of 3 |
+| document-spanish | 1.000 | 0.833 | 3 of 3 |
+| failure-anchored | 1.000 | 0.733 | 3 of 3 |
+| failure-anchored-weak | 1.000 | 0.800 | 3 of 3 |
+| failure-startup | 1.000 | 0.733 | 3 of 3 |
+| plan-contradiction | 1.000 | 0.750 | 3 of 3 |
+| plan-theory | 0.933 | 0.600 | 2 of 3 |
+| quick-look | 1.000 | 1.000 | 3 of 3 |
+| witness-change | 1.000 | 0.000 | 3 of 3 |
+| witness-contract | 0.625 | 0.125 | 0 of 3 |
+| witness-missing | 1.000 | 0.000 | 3 of 3 |
+
+- **witness-contract, `contract` FAIL x3.** The Opus judge's verdict carries
+  no rationale, so one report was put to a separate Opus grader with the
+  same criterion: all seven fields and both sections are present, but F2's
+  Evidence ("the tests use dates 9/29, 9/10, 8/1 and today; none is exactly
+  today-7 (9/23)") is the witness's summary, not a quote. All three reports
+  had the same pattern on their missing-test finding. The grader asks for "a
+  verbatim quote"; the Haiku judge had passed these reports in every earlier
+  run. The grader is right; the witness agent was fixed (below).
+- **plan-theory run 3, `report-shape` FAIL x3.** The report's findings have
+  location, evidence and fix; the traces were deleted before they were
+  read, so the judge's reason is not known. 2 of 3 meets the bar; not
+  investigated further.
+- **Theory leaks without the plugin** (`theory-not-in-brief` matched): plan-theory
+  3 of 3 again, failure-anchored 1 of 3, failure-startup 1 of 3 (0 of 6 in
+  the two Haiku-judged full runs; the grader is a regex, so the judge is not
+  the difference). With the plugin: none. The traces were deleted before
+  they were read, so the leaked wording is not quoted here.
+
+### Anchoring: does the theory change the diagnosis? (open item 4 of the review)
+
+No, in these cases. The no-plugin arm's `cause` passed 3 of 3 in
+failure-anchored and 3 of 3 in failure-anchored-weak, in both the smoke run
+and the full run: every no-plugin session found the port and said its race
+theory was wrong, including the runs where the theory reached its reviewer.
+The code evidence is decisive and one file away. What the plugin changes
+here is the independence of the brief and the report, not the diagnosis. A
+case where anchoring does change the outcome would need evidence that is
+genuinely ambiguous; none is written.
+
+### Witness fix (commit `2210955`)
+
+`agents/witness.md`: Evidence is only text copied from the material, with
+the file named; for something missing, copy the lines that show the gap
+(for a missing test, the existing test lines).
+
+- Iteration 1 (the field description only; uncommitted): witness-contract
+  1 of 3 ($1.17); clean-control as a control 3 of 3 ($3.88). The failing
+  reports still summarised the test dates.
+- Iteration 2 (a paragraph with an example, committed): witness-contract
+  1.000 / 0.125, 3 of 3 ($1.07). Controls: clean-control 1.000 / 0.250 and
+  code-offbyone 1.000 / 0.750, 3 of 3 each ($3.85, $3.50).
+
+### Haiku against Opus as judge
+
+Same graders, different runs, so run-to-run variance is mixed in. With the
+plugin, the Opus judge failed one thing the Haiku judge never had
+(witness-contract, a real defect) and one report-shape run in plan-theory.
+Without the plugin, scores were close (clean-control 0.250 against 0.500,
+failure-startup 0.733 against 0.800, the rest equal). No with-plugin pass
+under Haiku looked like a false pass except witness-contract.
+
+### Final table (Opus judge)
+
+| Case | With | Without | Delta | With-plugin runs | Commit |
+|---|---|---|---|---|---|
+| clean-control | 1.000 | 0.250 | +0.750 | 3 of 3 | `2210955` |
+| code-offbyone | 1.000 | 0.750 | +0.250 | 3 of 3 | `2210955` |
+| document-report | 1.000 | 0.833 | +0.167 | 3 of 3 | `efc8e16` |
+| document-spanish | 1.000 | 0.833 | +0.167 | 3 of 3 | `efc8e16` |
+| failure-anchored | 1.000 | 0.733 | +0.267 | 3 of 3 | `efc8e16` |
+| failure-anchored-weak | 1.000 | 0.800 | +0.200 | 3 of 3 | `efc8e16` |
+| failure-startup | 1.000 | 0.733 | +0.267 | 3 of 3 | `efc8e16` |
+| plan-contradiction | 1.000 | 0.750 | +0.250 | 3 of 3 | `efc8e16` |
+| plan-theory | 0.933 | 0.600 | +0.333 | 2 of 3 | `efc8e16` |
+| quick-look | 1.000 | 1.000 | 0.000 | 3 of 3 | `efc8e16` |
+| witness-change | 1.000 | 0.000 | +1.000 | 3 of 3 | `efc8e16` |
+| witness-contract | 1.000 | 0.125 | +0.875 | 3 of 3 | `2210955` |
+| witness-missing | 1.000 | 0.000 | +1.000 | 3 of 3 | `efc8e16` |
+
+`2210955` changes only the witness agent's evidence rule; the rows at
+`efc8e16` ran with the earlier wording, whose only measured failure was the
+one it fixes. Session 3 eval spend: $70.30.

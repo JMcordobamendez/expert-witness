@@ -90,7 +90,7 @@ who raised or rejected it. There are no "do you approve my synthesis" rounds.
 ## Cost
 
 Each run is three full subagent reviews (one of them on Opus) plus the
-session's own verification. In the eval suite below a with-plugin run cost
+session's own verification. In the eval suite (full run at `196ebd2`) a with-plugin run cost
 about five and a half times as much as the session reviewing alone (mean
 $0.98 per run, against $0.18). When you invoke it by hand, use it where
 a wrong verdict costs more than the review; the three automatic moments run
@@ -111,7 +111,7 @@ The suite lives in `evals/` and runs with
 
 ```
 claude plugin eval . --scaffold --trust-plugin --no-publish -j 4 --keep-temp \
-  --allow-tools Write Edit --json docs/.results.json
+  --allow-tools Write Edit --judge-model opus --json docs/.results.json
 ```
 
 Each case is scored with the plugin and without it (the same orchestrator on
@@ -128,47 +128,57 @@ Opus, same prompt, same tools), three runs per arm:
 | `document-spanish` | a Spanish management report whose "costs fell every quarter" contradicts its data; the report must come back in Spanish |
 | `plan-theory` | a migration plan that drops a column before backfilling from it; the session is handed its own theory (a table lock) that must not reach the brief |
 | `witness-change` | files in the reviewed repo change while the witnesses run (an eval-only helper plugin's hook stands in for a witness that edits); the after snapshot must catch it |
+| `failure-anchored` | a service that connects to the wrong port because its env file is looked for in the wrong folder; the session is handed a plausible wrong theory (a boot-time race) and the diagnosis must not adopt it |
+| `failure-anchored-weak` | the same without the fact that rules the race out, so only the code does |
+| `quick-look` | negative trigger: a one-line question about a document; the skill must not fire |
+| `witness-missing` | Fable's report is lost every time (an eval-only hook deletes it); the skill must retry once, then report Fable as missing without marking the run insufficient |
 
-Results (2026-09-30, orchestrator on Opus, no shell anywhere; mean score over 3 runs per arm):
+Results (2026-09-30, orchestrator on Opus, LLM graders judged by Opus, no
+shell anywhere; mean score over 3 runs per arm):
 
 | Case | With plugin | Without | Delta | With-plugin runs passed |
 |---|---|---|---|---|
-| clean-control | 1.000 | 0.500 | +0.500 | 3 of 3 |
+| clean-control | 1.000 | 0.250 | +0.750 | 3 of 3 |
 | code-offbyone | 1.000 | 0.750 | +0.250 | 3 of 3 |
 | document-report | 1.000 | 0.833 | +0.167 | 3 of 3 |
 | document-spanish | 1.000 | 0.833 | +0.167 | 3 of 3 |
-| failure-startup | 1.000 | 0.800 | +0.200 | 3 of 3 |
+| failure-anchored | 1.000 | 0.733 | +0.267 | 3 of 3 |
+| failure-anchored-weak | 1.000 | 0.800 | +0.200 | 3 of 3 |
+| failure-startup | 1.000 | 0.733 | +0.267 | 3 of 3 |
 | plan-contradiction | 1.000 | 0.750 | +0.250 | 3 of 3 |
-| plan-theory | 1.000 | 0.600 | +0.400 | 3 of 3 |
-| witness-change | 1.000 | 0.083 | +0.917 | 3 of 3 |
+| plan-theory | 0.933 | 0.600 | +0.333 | 2 of 3 |
+| quick-look | 1.000 | 1.000 | 0.000 | 3 of 3 |
+| witness-change | 1.000 | 0.000 | +1.000 | 3 of 3 |
 | witness-contract | 1.000 | 0.125 | +0.875 | 3 of 3 |
+| witness-missing | 1.000 | 0.000 | +1.000 | 3 of 3 |
 
 How to read it:
 
-- Six cases come from the full-suite run at commit `196ebd2`. The last fix
-  (commit `8508aa9`, the no-shell run-directory rule) was measured by rerunning
-  document-report and document-spanish, which it had broken (1 of 3 each at
-  `196ebd2`: the skill refused its only writable directory and stopped), and
-  code-offbyone as a control. Those three rows are from `8508aa9`, where all
-  nine with-plugin runs wrote the brief in the working directory at the
-  first try. The fix only changes where the run directory goes, and the
-  other six cases passed 3 of 3 at `196ebd2` with it placed correctly.
+- Ten rows come from one full-suite run at commit `efc8e16`. The Opus judge
+  failed witness-contract 3 of 3 there, rightly: the witnesses gave a summary
+  of the tests, not a quote, as evidence for a missing test (the Haiku judge
+  had passed the same pattern in every earlier run). The witness agent was
+  fixed in `2210955`; witness-contract, and clean-control and code-offbyone
+  as controls, were rerun there.
 - Only graders that apply to both arms count in the score. The with-only
-  indicators (three witnesses dispatched, Fable used, no source pasted into
-  the brief, facts in the brief, the after snapshot listing the changed file)
-  passed in every with-plugin run above.
-- witness-contract and witness-change are not like-for-like. Without the
-  plugin the witness agent does not exist, and the helper hook that changes
-  files is not loaded, so there is nothing to catch.
+  indicators (three witnesses dispatched, Fable used, Fable retried, no source
+  pasted into the brief, facts in the brief, the after snapshot listing the
+  changed file) passed in every with-plugin run above.
+- witness-contract, witness-change and witness-missing are not like-for-like.
+  Without the plugin the witness agent does not exist and the helper hooks
+  are not loaded, so there is nothing to catch.
 - Without the plugin the session usually finds the planted defect too; what it
   loses is mostly the report (no named reviewers, no confirmed / rejected
-  split), which is what `report-shape` measures. The independence graders
-  are where it differs in kind: in plan-theory the session put its own
-  theory (the table lock) into its reviewer's prompt in 3 of 3 runs, in both
-  full-suite runs; with the plugin it never did.
-- clean-control was flaky before (2 of 3 at `1ad1025`); it passed 3 of 3 in
-  both full-suite runs after the report step started forcing the template's
-  headings.
+  split), which is what `report-shape` measures.
+- Independence: without the plugin the session put its own theory into its
+  reviewer's prompt in plan-theory (3 of 3 runs, in all three full-suite
+  runs), failure-anchored (1 of 3) and failure-startup (1 of 3); with the
+  plugin it never did. But the theory did not change the diagnosis: in both
+  failure-anchored cases the session alone found the real cause and dropped
+  its theory in every run. The code there settles the question; a case with
+  genuinely ambiguous evidence might show a difference, and none is written.
+- quick-look scores the same in both arms by design: it checks the skill
+  stays quiet, and it did in 3 of 3.
 
 Details, traces and every grader change with its evidence are in
 [`docs/results.md`](docs/results.md); the no-plugin baseline is described in
@@ -182,12 +192,13 @@ Details, traces and every grader change with its evidence are in
   snapshots were a file listing plus line counts. With a shell
   the skill takes real `git status` / hash snapshots and witnesses can run
   things; that path has not been measured.
-- **Paths no eval exercises:** retrying a failed witness, missing witnesses
-  and the insufficient mark, disputes, and launching unasked. A hook like
-  witness-change's could simulate a lost witness report; that case is not
-  written yet. The after-snapshot case uses a hook that changes files while
-  the witnesses run, not a real witness that edits, and the spec's "after
-  snapshot shows no change" has no grader.
+- **Paths no eval exercises:** the insufficient mark (only one witness
+  left), no witness answering, disputes, and launching unasked. The retry and
+  one missing witness are covered by witness-missing, with a hook that deletes
+  the report rather than a witness that really fails. The after-snapshot case
+  likewise uses a hook that changes files while the witnesses run, not a real
+  witness that edits, and the spec's "after snapshot shows no change" has no
+  grader.
 - **The raw eval results are not in the repo** (`docs/.results*.json` are
   ignored); `docs/results.md` quotes the numbers and traces they come from.
 - **The snapshot detects, it does not prevent.** Witnesses have the same tools
@@ -195,11 +206,13 @@ Details, traces and every grader change with its evidence are in
   a sandbox; the before/after snapshot is what catches a breach.
 - **Triggering is not guaranteed.** The description now covers "critique it
   in detail", and document-report fired the skill in 9 of 9 runs after that
-  change (2 of 3 before). No case checks that it stays quiet on a request it
-  should not take. Type `/expert-witness` when you want it for sure.
-- **Graders are partly LLM judges** (Haiku by default) and three runs per arm
-  is a small sample: 3 of 3 separates a solid case from a lucky one less
-  well than it looks. `clean-control` failed 1 of 3 at an earlier commit.
+  change (2 of 3 before). quick-look checks one request it should not take
+  (a one-line question about a document); one case is not a boundary. Type
+  `/expert-witness` when you want it for sure.
+- **Graders are partly LLM judges** and three runs per arm is a small sample:
+  3 of 3 separates a solid case from a lucky one less well than it looks. The
+  table above was judged by Opus; the harness default, Haiku, had passed a
+  real defect (paraphrased evidence) in every earlier run.
 - **Verification is only as good as the session's reading.** A finding the
   session cannot check is reported as "could not verify", not dropped and not
   confirmed.

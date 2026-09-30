@@ -1,4 +1,4 @@
-# Handoff: state of expert-witness 1.0.0 (2026-09-30)
+# Handoff: state of expert-witness 1.0.0 (2026-09-30, after session 3)
 
 Read this first when you pick the project up in a new session.
 
@@ -10,6 +10,9 @@ Read this first when you pick the project up in a new session.
 - If your session is assigned a different branch name, create it from
   `origin/feat/v1` (`git fetch origin feat/v1 && git checkout -B <branch>
   origin/feat/v1`); otherwise keep working on `feat/v1` so PR #1 stays current.
+- Session 3 (Opus judge, four new cases, witness evidence fix) is on branch
+  `claude/fix-fixture-docstring-qulkpg`, based on `feat/v1` and not yet in
+  PR #1 or any PR. Josemi decides whether it goes into PR #1 or a new PR.
 - Josemi (the owner) writes in Spanish. Summaries for him go on PR #1 in
   Spanish; repo docs are in English.
 
@@ -40,36 +43,47 @@ Read this first when you pick the project up in a new session.
   must pass before each push.
 - Commits end with the session's attribution lines.
 
-Full suite (9 cases, about 19 minutes, about $26):
+- LLM graders are judged by Opus (`--judge-model opus`). The Haiku default
+  passed paraphrased evidence as "a verbatim quote" in every run before
+  session 3.
+
+Full suite (13 cases, about 32 minutes, about $46 with the Opus judge):
 
 ```
 claude plugin eval . --scaffold --trust-plugin --no-publish -j 4 --keep-temp \
-  --allow-tools Write Edit --json docs/.results.json
+  --allow-tools Write Edit --judge-model opus --json docs/.results.json
 ```
+
+`--case` takes a glob without braces; to pick several cases use `--tag`.
 
 One case: add `--case <name>`. After a run, remove the kept temp dirs with
 `chmod -R u+rwX /tmp/claude-eval-* && rm -rf /tmp/claude-eval-*` (never run
 git inside them).
 
-## Current scores (mean of 3 runs per arm)
+## Current scores (mean of 3 runs per arm, Opus judge)
 
 | Case | With | Without | With-plugin runs passed | Measured at |
 |---|---|---|---|---|
-| clean-control | 1.000 | 0.500 | 3 of 3 | `196ebd2` |
-| code-offbyone | 1.000 | 0.750 | 3 of 3 | `8508aa9` |
-| document-report | 1.000 | 0.833 | 3 of 3 | `8508aa9` |
-| document-spanish | 1.000 | 0.833 | 3 of 3 | `8508aa9` |
-| failure-startup | 1.000 | 0.800 | 3 of 3 | `196ebd2` |
-| plan-contradiction | 1.000 | 0.750 | 3 of 3 | `196ebd2` |
-| plan-theory | 1.000 | 0.600 | 3 of 3 | `196ebd2` |
-| witness-change | 1.000 | 0.083 | 3 of 3 | `196ebd2` |
-| witness-contract | 1.000 | 0.125 | 3 of 3 | `196ebd2` |
+| clean-control | 1.000 | 0.250 | 3 of 3 | `2210955` |
+| code-offbyone | 1.000 | 0.750 | 3 of 3 | `2210955` |
+| document-report | 1.000 | 0.833 | 3 of 3 | `efc8e16` |
+| document-spanish | 1.000 | 0.833 | 3 of 3 | `efc8e16` |
+| failure-anchored | 1.000 | 0.733 | 3 of 3 | `efc8e16` |
+| failure-anchored-weak | 1.000 | 0.800 | 3 of 3 | `efc8e16` |
+| failure-startup | 1.000 | 0.733 | 3 of 3 | `efc8e16` |
+| plan-contradiction | 1.000 | 0.750 | 3 of 3 | `efc8e16` |
+| plan-theory | 0.933 | 0.600 | 2 of 3 | `efc8e16` |
+| quick-look | 1.000 | 1.000 | 3 of 3 | `efc8e16` |
+| witness-change | 1.000 | 0.000 | 3 of 3 | `efc8e16` |
+| witness-contract | 1.000 | 0.125 | 3 of 3 | `2210955` |
+| witness-missing | 1.000 | 0.000 | 3 of 3 | `efc8e16` |
 
-`8508aa9` changed only step 1 (run directory); see `docs/results.md`,
-"Session 2". witness-change and witness-contract deltas are not like-for-like.
+`2210955` changed only the witness agent's evidence rule; see
+`docs/results.md`, "Session 3". witness-change, witness-contract and
+witness-missing deltas are not like-for-like.
 
-Eval spend so far: $85.73 ($17.24 in session 1, $68.49 in session 2). A full
-suite now takes about 19 minutes and $26.
+Eval spend so far: $156.03 ($17.24 in session 1, $68.49 in session 2,
+$70.30 in session 3).
 
 ## Standing lesson
 
@@ -84,14 +98,15 @@ at least one code case and one document case.
    socat missing on Josemi's machine). The real path (git snapshots,
    witnesses running tests) is unmeasured; a CI runner or a machine with socat
    could run the suite with `--allow-tools Bash`.
-2. **A negative triggering case.** The description was widened to "critique
-   it in detail"; no case checks that the skill stays quiet on a request it
-   should not take (a quick question about a file, a one-line fix).
-3. **Paths no eval exercises:** retry, missing witnesses and the insufficient
-   mark, disputes, launching unasked. A helper-plugin hook like
-   witness-change's could delete a witness report to exercise retry.
-4. **Sample size.** Three runs per arm with a Haiku judge; run `--runs 5` on
-   any case before drawing conclusions from one flaky run.
+2. **Triggering boundary.** quick-look covers one request the skill must not
+   take; more (a one-line fix, a question about code) would map the boundary.
+3. **Paths no eval exercises:** the insufficient mark (hook deleting two
+   reports), no witness answering, disputes, launching unasked.
+4. **Sample size.** Three runs per arm; run `--runs 5` on any case before
+   drawing conclusions from one flaky run (plan-theory was 2 of 3 once).
 5. **Known trade-off in step 1:** without a shell, in a subdirectory of the
    user's repo, a document review that does not name the repo can put the run
    directory inside it.
+6. **Anchoring that changes the outcome.** In both failure-anchored cases the
+   session alone dropped its wrong theory; a case with genuinely ambiguous
+   evidence would test whether independence changes the diagnosis.
