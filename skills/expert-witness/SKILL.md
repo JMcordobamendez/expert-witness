@@ -1,6 +1,6 @@
 ---
 name: expert-witness
-description: Use when a spec, plan, design or document has just been written and is about to be acted on; when a failure has resisted two fix attempts; when a change is hard to undo or touches security; or when the user asks for an independent, blind or multi-model review or audit of code, a plan, a document or a failure.
+description: Use when a spec, plan, design or document has just been written and is about to be acted on; when a failure has resisted two fix attempts; when a change is hard to undo or touches security; or when the user asks for an independent, blind or multi-model review, audit or critique of code, a plan, a document (a report, a proposal, a piece of writing) or a failure.
 ---
 
 # Expert witness
@@ -67,8 +67,21 @@ new evidence, or the user disputes a verdict.
    (say why). A finding does not become true because three witnesses said it,
    nor false because one did.
 
-9. **Report.** Fill `report-template.md` in the user's language, save it as
-   `<run>/report.md`, and give it to the user.
+   Confirmed means you can point at the line and it contradicts what the
+   subject itself says or promises (its docstring, spec, tests, data or log),
+   or it gives a wrong result for an input the subject says it accepts. A
+   problem that needs an input or use the subject never promises to handle
+   is minor at most, and without a promise to break it is "does not hold". You
+   set each confirmed finding's severity; a witness's rating is an opinion.
+   When nothing confirmed is critical or important, the report says so in its
+   first line.
+
+9. **Report.** Fill `report-template.md` in the user's language and save it
+   as `<run>/report.md`. Your final message is that filled template itself,
+   every section present (write "None" in an empty one), with the run path at
+   the end: which witnesses answered by name and model (S sonnet, O opus,
+   F fable), and for each finding its location, the quoted evidence and the
+   proposed fix. A prose summary that points to the file is not the report.
 
 ## Disputes
 
