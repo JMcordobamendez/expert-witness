@@ -1,0 +1,13 @@
+{
+  "name": "expert-witness",
+  "description": "Marketplace for the expert-witness plugin.",
+  "owner": { "name": "JMcordobamendez" },
+  "plugins": [
+    {
+      "name": "expert-witness",
+      "source": "./",
+      "description": "Blind multi-model review: three witnesses, verified findings.",
+      "version": "0.1.0"
+    }
+  ]
+}
