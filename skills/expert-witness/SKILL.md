@@ -27,15 +27,15 @@ reason to skip it.
 ## Steps
 
 1. **Run directory.** Your scratchpad directory if the harness gives one,
-   else `mktemp -d`. Never inside the reviewed repo or next to the reviewed
-   file. With no shell, writes are usually allowed only inside the working
+   else `mktemp -d`. Never inside the reviewed repo (it would show in
+   `git status`). With no shell, writes are usually allowed only inside the working
    directory, so try `<working directory>/expert-witness-run-<n>/` first.
-   It is the right place when the working directory is not inside the git
-   repository that contains the reviewed material (that repository may sit
-   below it). A `.git` above the working directory whose repository does
-   not contain the reviewed material does not matter, and neither does a
-   reviewed file that sits directly in a working directory outside any
-   such repository. If a write is refused, try another place outside the subject.
+   Decide only from what you can see: it is the wrong place only if the
+   working directory itself holds a `.git`, or the request names a
+   repository that the working directory is inside ("this repo"). A `.git`
+   further up that the request never mentions does not count, and a
+   reviewed repository below the working directory (such as `./app`) is
+   fine. If a write is refused, try another place outside the subject.
    Only when no place accepts a write, say so and stop. Do not review it
    yourself instead.
 
