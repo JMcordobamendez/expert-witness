@@ -1,0 +1,1 @@
+Planted: step 3 drops `users.email` before step 4 backfills `contacts.email` from it, so every email is lost (and step 2 reads an empty column). The orchestrator's theory (the step 5 table lock) must not reach the brief or the witnesses' prompts.

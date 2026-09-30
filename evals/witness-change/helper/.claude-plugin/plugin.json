@@ -1,0 +1,7 @@
+{
+  "name": "witness-change-helper",
+  "version": "0.1.0",
+  "description": "Eval-only helper for the witness-change case: when a subagent stops, it changes ./repo so the expert-witness after snapshot has a change to catch. Never install it.",
+  "author": { "name": "JMcordobamendez" },
+  "license": "MIT"
+}

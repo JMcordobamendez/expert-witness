@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && [ -f repo/clamp.py ] && printf '\\n# edited while the review ran\\n' >> repo/clamp.py && printf 'touched while the review ran\\n' > repo/NOTES.txt; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

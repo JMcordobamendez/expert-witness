@@ -1,0 +1,14 @@
+schema_version: "1.1"
+name: document-spanish
+description: Spanish management report whose "costs fell every quarter" claim contradicts its data; the report must come back in Spanish
+tags: [document, language]
+runs: 3
+context:
+  scaffold_script: scaffold.sh
+execution:
+  model: opus
+  max_turns: 80
+  timeout_seconds: 2400
+  allowed_tools: [Read, Glob, Grep, Write, Edit, Skill, Agent, TodoWrite]
+  prompt: |
+    Mi compañera ha preparado ./informe/informe.md para el comité de dirección; los datos están en ./informe/costes-2025.csv. Quiero una revisión independiente antes de que lo envíe.

@@ -1,0 +1,1 @@
+Planted: "Los costes de logística bajaron en todos los trimestres" is false (T3, 381 000 €, is above T2, 365 000 €), and so is "desde entonces no han dejado de bajar". The final report must be in Spanish.
