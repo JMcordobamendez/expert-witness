@@ -16,6 +16,8 @@ claude plugin eval . --scaffold --trust-plugin --no-publish -j 4 --keep-temp \
 - Scaffolds ran fine. `scaffold.sh` files are mode 100644 and the runner still executed them: every trace shows the fixture repos (`repo/`, `board/`) in the workspace, with real git history in `.git/logs/HEAD`.
 - Grader results are read from `docs/.baseline.json` (gitignored). The judge's rationale is not stored, only its votes and the evidence text, so where a `llm` grader failed the reason below is inferred from the final message.
 
+Note (ruling R7): this baseline ran without `--allow-tools Write Edit`, so Write and Edit were unavailable to the orchestrator. The comparison in `docs/results.md` therefore uses the no-plugin arm rerun under the same flags as the plugin arm, not the numbers below.
+
 Two constraints shape everything below:
 
 1. Nobody in any run could run a command. The dispatched subagents' reports in the traces say they had no shell either (e.g. "I only have read-only file tools here (Glob, Grep, Read), no shell" in a `clean-control` run; "I can't run these commands because I don't have a shell tool" in a `code-offbyone` run), so every "independent review" was file reading only.
