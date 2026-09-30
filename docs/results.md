@@ -17,7 +17,7 @@ Eval command: `claude plugin eval . --scaffold --trust-plugin --no-publish --abl
 Full-suite command (default ablation with-without; the no-plugin arm reruns under the same flags, so the delta is fair):
 `claude plugin eval . --scaffold --trust-plugin --no-publish -j 4 --keep-temp --allow-tools Write Edit --json docs/.results.json`. No Bash anywhere. Per-case reruns add `--case <name>`. `witnesses-dispatched`, `fable-used` and `tool_used: Skill` are with-only indicators under ablation; the with-plugin arm is what is judged.
 
-### Final scores (with / without / delta)
+### Scores at handoff (superseded by "Final rerun" below)
 
 | Case | With | Without | Delta | Source of the numbers |
 |---|---|---|---|---|
@@ -99,3 +99,23 @@ Not changed: `theory-not-in-brief` still matches `umask` in any Bash input. Bash
 - Step 3: the no-shell snapshot is a Glob of the whole reviewed tree plus line counts (Glob and Read give no byte sizes, and a list of pointed-at files cannot show a file a witness creates).
 - `brief-template.md`: the report path is left to the dispatch prompt, so all three witnesses get the identical brief the spec requires.
 - `report-template.md`: a verdict line under the header (step 8 asked for it "in the first line", which is the header), and "Changes made by witnesses" says when the snapshot was limited.
+
+## Final rerun (after the Task 5 review)
+
+Full suite at commit `1ad1025`, same command as above (`--allow-tools Write Edit`, no Bash), 3 runs per arm, 659 s, $15.00. Then document-report alone at commit `7c7f2b5` (step 1: try the working directory first), $2.20.
+
+| Case | With | Without | Delta | With-plugin runs | Mean cost per run (with / without) |
+|---|---|---|---|---|---|
+| clean-control | 0.750 | 0.500 | +0.250 | 1.0, 0.25, 1.0 | $1.09 / $0.20 |
+| code-offbyone | 1.000 | 0.500 | +0.500 | 1.0, 1.0, 1.0 | $0.88 / $0.20 |
+| document-report | 0.944 | 0.833 | +0.111 | 1.0, 1.0, 0.83 | $0.63 / $0.11 |
+| failure-startup | 1.000 | 0.733 | +0.267 | 1.0, 1.0, 1.0 | $0.86 / $0.17 |
+| plan-contradiction | 1.000 | 0.750 | +0.250 | 1.0, 1.0, 1.0 | $0.91 / $0.21 |
+| witness-contract | 1.000 | 0.125 | +0.875 | 1.0, 1.0, 1.0 | $0.13 / $0.07 |
+
+All numbers are from these two runs; none is carried over from earlier runs. document-report comes from its rerun; in the full run it scored 0.000 (see below). Suite verdict: not all green. Four cases pass 3/3; clean-control and document-report pass 2/3.
+
+- **document-report, full run: 0/3.** The skill fired, but in every run the orchestrator wrote `brief.md` to `/tmp/claude-eval-<id>/expert-witness-run-1/` and then `/tmp/claude-eval-<id>/home/expert-witness-run-1/` (both outside the working directory), both Writes were denied ("Permission to use Write has been denied because Claude Code is running in don't ask mode"), and it stopped as step 1 says, without reviewing. It never tried the working directory, which holds only `board/`. The review-fix wording of step 1 was still read as "go above the working directory". Step 1 now says to try `<working directory>/expert-witness-run-<n>/` first and when that is wrong. Rerun: runs 1 and 2 used `cwd/expert-witness-run-1/` and scored 1.0; in run 3 the Skill was never called (the orchestrator read the two files and critiqued alone, 0.83 on the both-arm graders, as the no-plugin arm does). Triggering on "Critique it in detail" is therefore 2/3, not reliable.
+- **clean-control run 2: 0.25.** `no-invented` judge FAIL x3. The report's own verdict line says "The last commit has no critical or important problems"; it confirms four findings, all marked minor (NaN value, NaN bounds, float/int tests, return type), and puts Fable's "important" rating under Disagreements with the orchestrator's reason for minor. The grader allows minor findings, so this looks like a judge error, probably provoked by the sentence "worth doing before the merge". The grader was not changed. This is a consequence of the step 8 fix: NaN findings are now confirmed as minor (spec-compliant) instead of "does not hold", which the Haiku judge sometimes reads as invented. Runs 1 and 3 passed.
+- **Cost.** A with-plugin run costs about 4 to 5 times the no-plugin run on the five skill cases (mean $0.87 vs $0.18).
+- **Grader regression check.** The tightened `no-pasted-source`, `theory-not-in-brief` and `facts-in-brief` all passed on every with-plugin run. `theory-not-in-brief` failed one no-plugin run of failure-startup (the orchestrator put `umask` in its reviewer's prompt), which is the leak the grader exists to catch.

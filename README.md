@@ -90,7 +90,8 @@ who raised or rejected it. There are no "do you approve my synthesis" rounds.
 
 Each run is three full subagent reviews (one of them on Opus) plus the
 session's own verification. In the eval suite below a with-plugin run cost
-roughly an order of magnitude more than the session reviewing alone. Use it
+about four to five times as much as the session reviewing alone (mean $0.87
+against $0.18 per run). Use it
 where a wrong verdict costs more than the review.
 
 ## Why Fable is on a technical panel
@@ -121,7 +122,24 @@ Opus, same prompt, same tools), three runs per arm:
 | `clean-control` | a correct `clamp` with tests; measures invented findings |
 | `witness-contract` | the witness agent alone: report shape, the boundary bug, flagging the requester's opinion, no edits |
 
-<!-- RESULTS -->
+Results of the final run (2026-09-30, orchestrator on Opus, no shell anywhere; mean score over 3 runs per arm):
+
+| Case | With plugin | Without | Delta | With-plugin runs passed |
+|---|---|---|---|---|
+| clean-control | 0.750 | 0.500 | +0.250 | 2 of 3 |
+| code-offbyone | 1.000 | 0.500 | +0.500 | 3 of 3 |
+| document-report | 0.944 | 0.833 | +0.111 | 2 of 3 |
+| failure-startup | 1.000 | 0.733 | +0.267 | 3 of 3 |
+| plan-contradiction | 1.000 | 0.750 | +0.250 | 3 of 3 |
+| witness-contract | 1.000 | 0.125 | +0.875 | 3 of 3 |
+
+Without the plugin the session usually finds the planted defect too; what it
+loses is mostly the report (no named reviewers, no confirmed / rejected
+split), and in some runs it misses the bug (code-offbyone), invents a blocker
+(clean-control) or passes its own theory to the reviewer (failure-startup).
+The two with-plugin failures: in document-report the skill did not fire in
+one run (the prompt only says "critique it in detail"), and in clean-control
+the judge failed a report whose findings were all marked minor.
 
 Details, traces and every grader change with its evidence are in
 [`docs/results.md`](docs/results.md); the no-plugin baseline is described in
@@ -138,9 +156,12 @@ Details, traces and every grader change with its evidence are in
 - **The snapshot detects, it does not prevent.** Witnesses have the same tools
   as the session and are told to change nothing. That is an instruction, not
   a sandbox; the before/after snapshot is what catches a breach.
+- **Triggering is not guaranteed.** Asked to "critique" a document without
+  the words "independent" or "review", the session used the skill in 2 of 3
+  runs. Type `/expert-witness` when you want it for sure.
 - **Graders are partly LLM judges** (Haiku by default) and three runs per arm
-  is a small sample; one case (`clean-control`) has been flaky on the report
-  shape judge.
+  is a small sample. `clean-control` has been flaky: the judge sometimes fails
+  a report whose confirmed findings are all minor.
 - **Verification is only as good as the session's reading.** A finding the
   session cannot check is reported as "could not verify", not dropped and not
   confirmed.
