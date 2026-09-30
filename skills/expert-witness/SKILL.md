@@ -27,12 +27,13 @@ new evidence, or the user disputes a verdict.
 
 1. **Run directory.** Your scratchpad directory if the harness gives one,
    else `mktemp -d`. Never inside the reviewed repo or next to the reviewed
-   file. With no shell: `./expert-witness-run-<n>/` directly in the working
-   directory, but only if the working directory is not itself the reviewed
-   repo and does not directly hold the reviewed file. Otherwise, or if a
-   write there is refused, pick another writable place outside the reviewed
-   subject; if none accepts a write, say so and stop. Do not review it
-   yourself instead.
+   file. With no shell, writes are usually allowed only inside the working
+   directory, so try `<working directory>/expert-witness-run-<n>/` first.
+   It is the right place when the subject sits in a subfolder (`./app`,
+   `./notes/proposal.md`); it is wrong only when the working directory is
+   itself the reviewed repo or directly holds the reviewed file. If a write
+   is refused, try another place outside the subject. Only when no place
+   accepts a write, say so and stop. Do not review it yourself instead.
 
 2. **Brief.** Copy `brief-template.md` to `<run>/brief.md` and fill every
    slot. The request is the user's own words, quoted exactly. Material is
