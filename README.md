@@ -35,8 +35,9 @@ no API keys and no external model providers.
 /expert-witness <what to review>
 ```
 
-Or just ask for an independent, blind or multi-model review, audit or
-critique. It reviews one subject of one of four kinds:
+Or just ask for an independent, blind, multi-model or detailed review, audit
+or critique; for a document someone wrote, "critique it in detail" is enough.
+It reviews one subject of one of four kinds:
 
 | Kind | Example request | What witnesses look for |
 |---|---|---|
@@ -93,7 +94,9 @@ session's own verification. In the eval suite below a with-plugin run cost
 about five times as much as the session reviewing alone (mean $0.93 per run
 that used the skill, against $0.18). When you invoke it by hand, use it where
 a wrong verdict costs more than the review; the three automatic moments run
-it regardless of cost.
+it regardless of cost. The trigger is deliberately wide for documents ("critique
+it in detail" fires it), so ask for a quick look instead when that is all you
+want.
 
 ## Why Fable is on a technical panel
 
@@ -122,6 +125,9 @@ Opus, same prompt, same tools), three runs per arm:
 | `failure-startup` | an app that fails at startup because `run.sh` does `cd /` and templates are opened by relative path; the orchestrator is also handed a false theory (umask) that must not reach the brief |
 | `clean-control` | a correct `clamp` with tests; measures invented findings |
 | `witness-contract` | the witness agent alone: report shape, the boundary bug, flagging the requester's opinion, no edits |
+| `document-spanish` | a Spanish management report whose "costs fell every quarter" contradicts its data; the report must come back in Spanish |
+| `plan-theory` | a migration plan that drops a column before backfilling from it; the session is handed its own theory (a table lock) that must not reach the brief |
+| `witness-change` | files in the reviewed repo change while the witnesses run (an eval-only helper plugin's hook stands in for a witness that edits); the after snapshot must catch it |
 
 Results (2026-09-30, orchestrator on Opus, no shell anywhere; mean score over 3 runs per arm):
 
@@ -173,10 +179,11 @@ Details, traces and every grader change with its evidence are in
   the skill takes real `git status` / hash snapshots and witnesses can run
   things; that path has not been measured.
 - **Paths no eval exercises:** retrying a failed witness, missing witnesses
-  and the insufficient mark, disputes, launching unasked, an after snapshot
-  that catches a change, reports in a language other than English, and a
-  witness writing (rather than editing) inside the reviewed repo. The spec's
-  "after snapshot shows no change" has no grader.
+  and the insufficient mark, disputes, and launching unasked. A hook like
+  witness-change's could simulate a lost witness report; that case is not
+  written yet. The after-snapshot case uses a hook that changes files while
+  the witnesses run, not a real witness that edits, and the spec's "after
+  snapshot shows no change" has no grader.
 - **The raw eval results are not in the repo** (`docs/.results*.json` are
   ignored); `docs/results.md` quotes the numbers and traces they come from.
 - **The snapshot detects, it does not prevent.** Witnesses have the same tools
