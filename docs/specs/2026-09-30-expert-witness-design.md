@@ -1,7 +1,9 @@
 # expert-witness — design
 
 **Date:** 2026-09-30
-**Status:** draft for review
+**Status:** implemented in 1.0.0. This is the original design; where the
+shipped skill differs (run directory without a shell, report headings, eval
+layout), `skills/expert-witness/SKILL.md` and `docs/results.md` are current.
 
 ## Purpose
 
@@ -77,8 +79,7 @@ expert-witness/
 │       ├── SKILL.md           # the orchestrator: when, brief, dispatch, verify, report
 │       ├── brief-template.md
 │       └── report-template.md
-├── tests/
-│   └── cases/                 # seeded-defect cases (see Testing)
+├── evals/                     # seeded-defect cases (see Testing)
 ├── README.md
 └── LICENSE                    # MIT
 ```
@@ -219,9 +220,10 @@ In this order:
 ## Testing
 
 A skill is only trusted once it has been seen to catch something (a quality
-gate that never fails proves nothing). `tests/cases/` holds one directory per
-case, each with the material, a `request.md` with the verbatim request, and an
-`expected.md` listing the planted defects. Witnesses never see `expected.md`,
+gate that never fails proves nothing). `evals/` holds one directory per
+case for `claude plugin eval`, each with the material (`fixture/`), a
+`case.yaml` with the verbatim request, `graders/`, and an `expected.md`
+listing the planted defects. Witnesses never see `expected.md`,
 which lives outside what the brief points at.
 
 1. **code:** a subtle real bug (an off-by-one bound) in code whose tests pass.
