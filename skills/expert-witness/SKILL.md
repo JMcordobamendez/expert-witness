@@ -27,8 +27,11 @@ new evidence, or the user disputes a verdict.
 
 1. **Run directory.** Your scratchpad directory if the harness gives one,
    else `mktemp -d`. Never inside the reviewed repo or next to the reviewed
-   file. With no shell: a new directory beside the reviewed repo or file
-   (never inside it), such as `<parent>/expert-witness-run-<n>/`.
+   file. With no shell: a new directory in the parent of the directory that
+   holds the reviewed repo or file, inside the working directory, such as
+   `<parent>/expert-witness-run-<n>/`. If a write to the run directory is
+   refused, pick another place outside the reviewed subject; if none accepts
+   a write, say so and stop. Do not review it yourself instead.
 
 2. **Brief.** Copy `brief-template.md` to `<run>/brief.md` and fill every
    slot. The request is the user's own words, quoted exactly. Material is
