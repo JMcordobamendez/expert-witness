@@ -10,9 +10,9 @@ Read this first when you pick the project up in a new session.
 - If your session is assigned a different branch name, create it from
   `origin/feat/v1` (`git fetch origin feat/v1 && git checkout -B <branch>
   origin/feat/v1`); otherwise keep working on `feat/v1` so PR #1 stays current.
-- Session 3 (Opus judge, four new cases, witness evidence fix) is on branch
-  `claude/fix-fixture-docstring-qulkpg`, based on `feat/v1` and not yet in
-  PR #1 or any PR. Josemi decides whether it goes into PR #1 or a new PR.
+- Session 3 (Opus judge, four new cases, witness evidence fix) was done on
+  `claude/fix-fixture-docstring-qulkpg` and fast-forwarded into `feat/v1`,
+  so it is part of PR #1.
 - Josemi (the owner) writes in Spanish. Summaries for him go on PR #1 in
   Spanish; repo docs are in English.
 
