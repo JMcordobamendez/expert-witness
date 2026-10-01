@@ -54,6 +54,13 @@ It does not re-run on the same subject unless something new happened.
 
 ## How it works
 
+The plugin has two parts: the witness agent (`agents/witness.md`), a reviewer
+that starts with no session context and must back every finding with a
+verbatim quote from the material, and the orchestrating skill
+(`skills/expert-witness/SKILL.md`), which the session follows. The session
+writes the brief, dispatches, verifies and reports; it is not a fourth
+witness and adds no findings of its own.
+
 1. **Run directory** outside the reviewed repo, so nothing lands in
    `git status`.
 2. **Brief** (`brief.md`), identical for all three witnesses: the kind, the
@@ -73,12 +80,14 @@ It does not re-run on the same subject unless something new happened.
 5. **After snapshot**; any change a witness made is reported first.
 6. **Collect**: a witness that fails or ignores the report shape is retried
    once, then reported as missing. With one witness left the run is marked
-   insufficient.
+   insufficient; with none, it stops and says no witness answered.
 7. **Cluster** findings about the same problem and record who raised each
    (S, O, F).
 8. **Verify** each cluster against the real source: confirmed, does not hold
    (with the reason), or could not verify (with the reason). Three witnesses
-   agreeing does not make a finding true.
+   agreeing does not make a finding true, nor does one witness alone make it
+   false. The session sets each confirmed finding's severity; a witness's
+   rating is only an opinion.
 9. **Report** (`report.md`, in your language): changes made by witnesses,
    diagnosis (failures), confirmed findings most severe first, disagreements,
    what does not hold, what could not be verified, missing witnesses.
