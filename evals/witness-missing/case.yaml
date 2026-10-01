@@ -1,0 +1,15 @@
+schema_version: "1.1"
+name: witness-missing
+description: The Fable witness's report is lost every time (an eval-only helper plugin's SubagentStop hook deletes witness-fable.md); the skill must retry it once, then report Fable as missing without marking the run insufficient. The no-plugin arm loads no helper and has no witnesses, so its delta is not like-for-like
+tags: [collect]
+runs: 3
+plugins: ["../..", "helper"]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  model: opus
+  max_turns: 80
+  timeout_seconds: 2400
+  allowed_tools: [Read, Glob, Grep, Write, Edit, Skill, Agent, TodoWrite]
+  prompt: |
+    Please get me an independent review of the last commit in ./repo (it adds clamp). I want to merge it today.

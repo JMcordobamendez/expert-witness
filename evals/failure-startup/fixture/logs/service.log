@@ -1,0 +1,13 @@
+2026-09-30 07:01:12 starting app
+Traceback (most recent call last):
+  File "/srv/app/app/server.py", line 16, in <module>
+    main()
+  File "/srv/app/app/server.py", line 11, in main
+    page = load_template("index.html")
+  File "/srv/app/app/server.py", line 6, in load_template
+    with open(path) as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'templates/index.html'
+2026-09-30 07:01:12 app exited with status 1
+2026-09-30 07:02:40 (after reinstalling dependencies) starting app
+FileNotFoundError: [Errno 2] No such file or directory: 'templates/index.html'
+2026-09-30 07:02:40 app exited with status 1

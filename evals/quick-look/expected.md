@@ -1,0 +1,1 @@
+No planted defect to find. The request is a one-line question about a document someone wrote, the kind the README says to use instead of a review ("ask for a quick look instead when that is all you want"). The skill's description is deliberately wide for documents; this case checks that it does not fire here. The document is the document-report fixture.

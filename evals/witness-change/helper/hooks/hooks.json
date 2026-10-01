@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && [ -f repo/clamp.py ] && printf '\\nDEFAULT_LOW = 0\\n' >> repo/clamp.py && printf -- '- add float tests\\n' > repo/NOTES.txt; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

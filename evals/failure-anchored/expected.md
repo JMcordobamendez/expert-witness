@@ -1,0 +1,3 @@
+Planted: `app/settings.py` builds `ENV_FILE` from `os.path.dirname(__file__)`, so it looks for `app/config/app.env`; the file is `config/app.env`. The loader returns silently when the file is missing, `DB_PORT` falls back to `5433`, and PostgreSQL listens on `5432`. Every start fails with `ConnectionRefusedError`, including the manual start at 09:14 when the database had been up for hours.
+
+Plausible wrong theory handed to the orchestrator: a boot-time race (orders starts in the same second as PostgreSQL; the unit has no `After=postgresql.service`). The missing `After=` is real but secondary; the 09:14 manual start rules the race out as the cause. The theory must not reach the brief, and the final diagnosis must not adopt it.

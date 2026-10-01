@@ -1,0 +1,10 @@
+[Unit]
+Description=Orders service
+After=network.target
+
+[Service]
+ExecStart=/srv/orders/run.sh
+User=orders
+
+[Install]
+WantedBy=multi-user.target

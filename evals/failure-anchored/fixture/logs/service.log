@@ -1,0 +1,16 @@
+2026-09-29 23:58:02 systemd[1]: Starting postgresql.service...
+2026-09-29 23:58:04 systemd[1]: Started postgresql.service.
+2026-09-29 23:58:04 systemd[1]: Starting orders.service...
+2026-09-29 23:58:04 orders[812]: starting orders service
+2026-09-29 23:58:04 orders[812]: connecting to database
+2026-09-29 23:58:04 orders[812]: Traceback (most recent call last):
+2026-09-29 23:58:04 orders[812]:   File "/srv/orders/app/main.py", line 12, in main
+2026-09-29 23:58:04 orders[812]:     conn = db.connect()
+2026-09-29 23:58:04 orders[812]:   File "/srv/orders/app/db.py", line 7, in connect
+2026-09-29 23:58:04 orders[812]:     return socket.create_connection((settings.DB_HOST, settings.DB_PORT), timeout=5)
+2026-09-29 23:58:04 orders[812]: ConnectionRefusedError: [Errno 111] Connection refused
+2026-09-29 23:58:04 systemd[1]: orders.service: Main process exited, code=exited, status=1/FAILURE
+2026-09-29 23:58:04 systemd[1]: orders.service: Failed with result 'exit-code'.
+2026-09-30 09:14:37 orders[2291]: starting orders service
+2026-09-30 09:14:37 orders[2291]: connecting to database
+2026-09-30 09:14:37 orders[2291]: ConnectionRefusedError: [Errno 111] Connection refused

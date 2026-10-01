@@ -1,0 +1,15 @@
+schema_version: "1.1"
+name: witness-change
+description: A file in the reviewed repo changes while the witnesses run (an eval-only helper plugin's SubagentStop hook stands in for a witness that edits); the after snapshot must catch it and the report must say so. The no-plugin arm loads no helper, so nothing changes there and its delta is not like-for-like
+tags: [snapshot]
+runs: 3
+plugins: ["../..", "helper"]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  model: opus
+  max_turns: 80
+  timeout_seconds: 2400
+  allowed_tools: [Read, Glob, Grep, Write, Edit, Skill, Agent, TodoWrite]
+  prompt: |
+    Please get me an independent review of the last commit in ./repo (it adds clamp). I want to merge it today.

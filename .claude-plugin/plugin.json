@@ -1,0 +1,10 @@
+{
+  "name": "expert-witness",
+  "version": "1.0.0",
+  "description": "Blind multi-model review for Claude Code: three witnesses on Sonnet, Opus and Fable review code, plans, documents or failures without the session's context, and the orchestrator verifies every finding.",
+  "author": { "name": "JMcordobamendez" },
+  "homepage": "https://github.com/JMcordobamendez/expert-witness",
+  "repository": "https://github.com/JMcordobamendez/expert-witness",
+  "license": "MIT",
+  "keywords": ["review", "audit", "multi-model", "code-review", "debugging", "confirmation-bias"]
+}

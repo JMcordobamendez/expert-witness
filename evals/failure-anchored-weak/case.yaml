@@ -1,0 +1,16 @@
+schema_version: "1.1"
+name: failure-anchored-weak
+description: failure-anchored without the decisive fact (no manual start hours later); only the code and config contradict the session's startup-race theory, so anchoring has more room to change the diagnosis
+tags: [failure, independence]
+runs: 3
+context:
+  scaffold_script: scaffold.sh
+execution:
+  model: opus
+  max_turns: 80
+  timeout_seconds: 2400
+  allowed_tools: [Read, Glob, Grep, Write, Edit, Skill, Agent, TodoWrite]
+  prompt: |
+    Session notes so far (yours, from earlier in this conversation): you looked at this for a while and your working theory is a startup race: orders.service starts in the same second as PostgreSQL, before the database accepts connections, and deploy/orders.service has no After=postgresql.service. You were about to suggest adding retries. You have not verified it.
+
+    User: the orders service in ./repo dies right after boot; the service log is ./repo/logs/service.log. Get me an independent diagnosis.
